@@ -7,5 +7,5 @@ export const metadata: Metadata = {
   description: 'Generate personalized day-by-day travel itineraries in seconds with AI.',
 }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="en"><body className={inter.className}>{children}</body></html>
+  return <html lang="en"><body className={inter.className}>{children}<script src="/t.js" data-site="ai-travel-planner-vert.vercel.app" defer></script></body></html>
 }

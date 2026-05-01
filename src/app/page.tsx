@@ -1,5 +1,23 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+
+function useRateLimit(key: string, limit: number) {
+  const getUsage = useCallback(() => {
+    if (typeof window === 'undefined') return { count: 0, date: '' }
+    try { return JSON.parse(localStorage.getItem(key) || '{"count":0,"date":""}') } catch { return { count: 0, date: '' } }
+  }, [key])
+  const today = new Date().toISOString().split('T')[0]
+  const usage = getUsage()
+  const count = usage.date === today ? usage.count : 0
+  const remaining = Math.max(0, limit - count)
+  const increment = useCallback(() => {
+    const d = new Date().toISOString().split('T')[0]
+    const u = getUsage()
+    const c = u.date === d ? u.count + 1 : 1
+    localStorage.setItem(key, JSON.stringify({ count: c, date: d }))
+  }, [key, getUsage])
+  return { remaining, increment, isLimited: remaining === 0 }
+}
 
 const INTERESTS = ['Food & Dining', 'Culture & History', 'Nature & Hiking', 'Art & Museums', 'Nightlife', 'Shopping', 'Adventure Sports', 'Photography']
 const BUDGETS = ['Budget', 'Moderate', 'Luxury']
@@ -128,6 +146,7 @@ function printItinerary(itinerary: Itinerary, withKids: boolean) {
 }
 
 export default function Home() {
+  const { remaining, increment, isLimited } = useRateLimit('wanderai-usage', 2)
   const [destination, setDestination] = useState('')
   const [duration, setDuration] = useState(5)
   const [budget, setBudget] = useState('Moderate')
@@ -145,7 +164,8 @@ export default function Home() {
   const { weather, weatherLoading } = useWeather(itinerary?.destination || destination, showWeather)
 
   async function generate() {
-    if (!destination) return
+    if (!destination || isLimited) return
+    increment()
     setLoading(true)
     setApiError(null)
     setShowWeather(true)
@@ -316,13 +336,20 @@ export default function Home() {
             </div>
           </div>
 
-          <button onClick={generate} disabled={!destination || loading}
-            className={`w-full py-4 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${withKids ? 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500' : 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500'}`}>
-            {loading
-              ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Crafting your itinerary...</>
-              : withKids ? '🧒 Generate family-friendly itinerary ✦' : 'Generate itinerary ✦'
-            }
-          </button>
+          {isLimited ? (
+            <div className="w-full py-4 rounded-xl bg-white/[0.04] border border-amber-700/30 text-center">
+              <p className="text-amber-400 font-semibold text-sm mb-1">Daily limit reached (2 free / day)</p>
+              <a href="#pricing" className="text-xs text-amber-600 hover:text-amber-400 underline">Upgrade for unlimited itineraries →</a>
+            </div>
+          ) : (
+            <button onClick={generate} disabled={!destination || loading}
+              className={`w-full py-4 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2 ${withKids ? 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500' : 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500'}`}>
+              {loading
+                ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Crafting your itinerary...</>
+                : withKids ? `🧒 Generate family itinerary ✦ (${remaining} left today)` : `Generate itinerary ✦ (${remaining} left today)`
+              }
+            </button>
+          )}
         </div>
 
         {/* Error state */}
@@ -442,6 +469,39 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Pricing section */}
+      <section id="pricing" className="border-t border-amber-900/20 px-6 py-20">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 border border-amber-700/40 bg-amber-950/20 text-amber-600 text-xs font-bold uppercase tracking-widest rounded">✦ Pricing</div>
+            <h2 className="text-4xl font-black text-amber-100 mb-2" style={{ fontFamily: 'Georgia, serif' }}>Start planning free</h2>
+            <p className="text-amber-900/80 text-sm">2 free itineraries per day · No card required</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-amber-900/30 rounded-2xl overflow-hidden">
+            {[
+              { name: 'Free', price: '$0', sub: 'forever', features: ['2 itineraries / day', 'Up to 14 days', 'Weather forecast', 'Kids family mode', 'Print to PDF', 'All destinations'], cta: 'Start free', highlight: false },
+              { name: 'Pro', price: '$6', sub: '/month', features: ['Unlimited itineraries', 'Save & edit trips', 'Hotel & flight links', 'Offline PDF export', 'Custom trip notes', 'Priority AI speed'], cta: 'Go Pro →', highlight: true },
+            ].map(plan => (
+              <div key={plan.name} className={`p-8 ${plan.highlight ? 'bg-amber-950/30' : 'bg-black/40'}`}>
+                <div className={`text-xs font-bold uppercase tracking-widest mb-1 ${plan.highlight ? 'text-amber-500' : 'text-amber-900'}`}>{plan.name}</div>
+                <div className={`text-5xl font-black mb-0.5 ${plan.highlight ? 'text-amber-300' : 'text-amber-900'}`} style={{ fontFamily: 'Georgia, serif' }}>{plan.price}</div>
+                <div className={`text-sm mb-6 ${plan.highlight ? 'text-amber-700' : 'text-amber-900/50'}`}>{plan.sub}</div>
+                <ul className="space-y-2.5 mb-8">
+                  {plan.features.map(f => (
+                    <li key={f} className={`flex items-start gap-2 text-sm ${plan.highlight ? 'text-amber-200/70' : 'text-amber-900/60'}`}>
+                      <span className={plan.highlight ? 'text-amber-500 mt-0.5' : 'text-amber-900/40 mt-0.5'}>•</span> {f}
+                    </li>
+                  ))}
+                </ul>
+                <button className={`w-full py-3 font-bold text-sm transition-all rounded-xl ${plan.highlight ? 'bg-amber-600 hover:bg-amber-500 text-black' : 'border border-amber-900/30 text-amber-900/50 cursor-default'}`}>
+                  {plan.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   )
 }
