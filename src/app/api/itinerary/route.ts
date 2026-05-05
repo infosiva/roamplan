@@ -1,13 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { callAI } from '@/lib/ai'
 
 export async function POST(req: NextRequest) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: 'API key not configured. Add ANTHROPIC_API_KEY in Vercel → Settings → Environment Variables.' }, { status: 500 })
-  }
-
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
   try {
     const { destination, duration, budget, travel_style, interests, travel_with } = await req.json()
     const withKids = travel_with === 'Family with Kids'
@@ -24,11 +18,9 @@ IMPORTANT - This is a FAMILY WITH KIDS itinerary:
 - Include a "kids_essentials" array at the top level with 6 packing/preparation tips for families
 ` : ''
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
-      system: 'You are a friendly, expert travel planner who gives warm, practical advice. Return ONLY valid JSON, no markdown, no explanation.',
-      messages: [{
+    const { text } = await callAI(
+      'You are a friendly, expert travel planner who gives warm, practical advice. Return ONLY valid JSON, no markdown, no explanation.',
+      [{
         role: 'user',
         content: `Create a ${duration}-day itinerary for ${destination}.
 Travelling with: ${travel_with}
@@ -55,9 +47,10 @@ Return exactly this JSON structure:
   "practical_tips": ["tip1", "tip2", "tip3", "tip4", "tip5"]
 }`,
       }],
-    })
+      4000,
+      'best',
+    )
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : '{}'
     const match = text.match(/\{[\s\S]*\}/)
     const itinerary = match ? JSON.parse(match[0]) : { raw: text }
     return NextResponse.json({ itinerary })
