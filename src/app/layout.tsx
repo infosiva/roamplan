@@ -1,18 +1,43 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
+import SharedNavbar from '@/components/SharedNavbar'
 import SharedFooter from '@/components/SharedFooter'
-const inter = Inter({ subsets: ['latin'] })
+import type { BrandConfig } from '@/components/SharedNavbar'
+
+export const brand: BrandConfig = {
+  name: 'WanderAI',
+  tagline: 'AI travel planner — personalised day-by-day itineraries for any destination.',
+  icon: '✈️',
+  color: '#0ea5e9',
+  url: 'https://wanderai.app',
+  navLinks: [{ label: 'Plan trip', href: '/' }],
+  cta: { label: 'Plan free →', href: '/' },
+}
+
 export const metadata: Metadata = {
   title: 'WanderAI — AI Travel Itinerary Planner',
-  description: 'Generate personalized day-by-day travel itineraries in seconds with AI.',
+  description: 'Generate personalised day-by-day travel itineraries in seconds. AI travel planner for any budget, duration and destination.',
+  keywords: ['travel planner', 'AI itinerary', 'trip planner', 'travel itinerary', 'holiday planner'],
+  openGraph: { title: 'WanderAI — AI Travel Planner', description: 'Personalised travel itineraries in seconds.', type: 'website', locale: 'en_GB', siteName: 'WanderAI' },
+  twitter: { card: 'summary_large_image', title: 'WanderAI', description: 'AI travel itinerary planner.' },
+  robots: { index: true, follow: true },
 }
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        {children}
-        <SharedFooter theme="dark" />
+      <head>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org", "@type": "SoftwareApplication",
+          "name": "WanderAI", "url": brand.url, "description": brand.tagline,
+          "applicationCategory": "TravelApplication", "operatingSystem": "Web",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" }
+        })}} />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <SharedNavbar brand={brand} />
+        <main className="flex-1 pt-16">{children}</main>
+        <SharedFooter brand={brand} />
         <script src="http://31.97.56.148:3098/t.js" data-site="ai-travel-planner-vert.vercel.app" defer></script>
       </body>
     </html>
