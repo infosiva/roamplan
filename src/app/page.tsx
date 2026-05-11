@@ -1,7 +1,13 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import ShareCard from '@/components/ShareCard'
+import GuidedTour, { type TourStep } from '@/components/GuidedTour'
 import { useGate } from '@/lib/shared/useGate'
+
+const TRAVEL_TOUR: TourStep[] = [
+  { target: '#planner', title: 'Plan any trip free', icon: '✈️', body: 'Type your destination, dates and interests — AI builds a full day-by-day itinerary in seconds.', placement: 'top' },
+  { target: '#pricing', title: 'Unlock unlimited trips', icon: '🗺️', body: 'Pro removes all daily limits — plan as many itineraries as you want.', placement: 'top' },
+]
 import RegisterGate from '@/lib/shared/RegisterGate'
 import { Spotlight } from '@/components/aceternity/spotlight'
 import { CardContainer, CardBody, CardItem } from '@/components/aceternity/card-3d'
@@ -858,6 +864,7 @@ export default function Home() {
         </div>
       </section>
 
+      <GuidedTour steps={TRAVEL_TOUR} storageKey="roamplan_tour_v1" accentColor="#0ea5e9" />
     </main>
     </>
   )
