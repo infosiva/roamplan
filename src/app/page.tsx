@@ -701,10 +701,51 @@ export default function Home() {
 
             {/* Actions */}
             <div className="flex flex-wrap justify-center gap-3 pt-2">
+              {/* Save trip */}
+              <button onClick={() => {
+                try {
+                  const saved = JSON.parse(localStorage.getItem('roamplan-saved') ?? '[]')
+                  const exists = saved.find((s: {destination: string; duration: number}) => s.destination === itinerary.destination && s.duration === itinerary.duration)
+                  if (!exists) {
+                    saved.unshift({ ...itinerary, savedAt: new Date().toISOString() })
+                    localStorage.setItem('roamplan-saved', JSON.stringify(saved.slice(0, 10)))
+                    alert('✅ Trip saved! Access it anytime from this device.')
+                  } else {
+                    alert('Trip already saved!')
+                  }
+                } catch { alert('Could not save trip.') }
+              }}
+                className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
+                style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
+                🔖 Save Trip
+              </button>
+              {/* WhatsApp share */}
+              <a href={`https://wa.me/?text=${encodeURIComponent(`✈️ My ${itinerary.destination} trip plan (${itinerary.duration} days)\n💰 ${itinerary.budget_estimate}\n\n${(itinerary.days ?? []).slice(0, 3).map(d => `Day ${d.day}: ${d.theme}`).join('\n')}\n\nPlan yours free → roamplan.app`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
+                style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
+                💬 Share on WhatsApp
+              </a>
+              {/* Generate packing list */}
+              <button onClick={() => {
+                const items = [
+                  '📄 Passport & travel docs', '💊 Medications', '🔌 Universal adapter',
+                  '👕 Weather-appropriate clothing', '👟 Comfortable walking shoes',
+                  '🎒 Day pack', '💳 Travel card / cash',
+                  withKids ? '🧸 Kids entertainment' : '📚 Book / kindle',
+                  withKids ? '🩹 First aid kit' : '🎧 Headphones',
+                  '☀️ Sunscreen', '📷 Camera / phone charger',
+                ]
+                alert(`📋 Packing list for ${itinerary.destination}:\n\n${items.join('\n')}`)
+              }}
+                className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
+                style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
+                📋 Packing List
+              </button>
               <button onClick={() => printItinerary(itinerary, withKids)}
                 className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
                 style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                🖨️ Print or save as PDF
+                🖨️ Print / PDF
               </button>
               <ShareCard
                 title={`${itinerary.destination} — ${itinerary.duration} Days`}
