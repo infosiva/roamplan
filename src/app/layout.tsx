@@ -37,6 +37,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "applicationCategory": "TravelApplication", "operatingSystem": "Web",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" }
         })}} />
+      
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --theme-primary: #ea580c;
+            --theme-secondary: #f97316;
+            --theme-base: #0c0702;
+            --background: #0c0702;
+            --surface-1: #1a0e05;
+            --surface-2: #261508;
+            --foreground: #fff7ed;
+            --text-2: #fdba74;
+            --border-default: rgba(234,88,12,0.15);
+            --border-strong: rgba(234,88,12,0.3);
+          }
+          body { font-family: 'Inter', system-ui, sans-serif !important; }
+          h1, h2, h3 { font-family: 'Syne', sans-serif !important; letter-spacing: -0.03em; }
+          .glass { background: rgba(12,7,2,0.7) !important; border-color: rgba(234,88,12,0.12) !important; }
+        ` }} />
       </head>
       <body className="flex flex-col min-h-screen">
         <AnimatedBackground />
