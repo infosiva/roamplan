@@ -1,0 +1,22 @@
+# RoamPlan
+> AI travel planner that builds personalised day-by-day itineraries for any destination in seconds.
+
+## What this site does
+RoamPlan uses AI to create a complete, personalised travel itinerary for any destination — including daily schedules, hotel recommendations, restaurant picks, local tips, budget breakdown, and weather forecast. Enter your destination, travel dates, budget, and interests, and the AI builds a trip plan you can follow or customise.
+
+## Who it's for
+Solo travellers, couples, families, and groups planning holidays, city breaks, and adventure trips. Works for any destination worldwide and any trip length.
+
+## Key features
+- AI-generated day-by-day itinerary for any destination
+- Hotel and restaurant recommendations
+- Live weather forecast integrated into the plan
+- Family and kids mode — child-friendly activities
+- Budget breakdown by category (transport, hotels, food, activities)
+- PDF export to take your plan offline
+
+## Pricing
+Free tier available — plan up to a 3-day trip. Pro plan from $4.99/month for unlimited trip length and destinations.
+
+## Contact
+https://roamplan.app
