@@ -1,18 +1,24 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import siteConfig from '@/site.config'
 
-const ACCENT = '#f97316'
-const BOT_NAME = 'RoamBot'
-const WELCOME = '✈️ Hi! I\'m RoamBot — your AI travel assistant. Ask me about destinations, visa requirements, packing tips, budgeting, or help planning your next adventure!'
-const SYSTEM_PROMPT = `You are RoamBot, the AI travel assistant for RoamPlan — an AI-powered travel planner.
-Help users plan trips, suggest destinations, explain itinerary items, give travel tips, visa info, and budgeting advice.
-Be enthusiastic, concise, and practical. Help them get the most from their trip.`
+const ACCENT = '#0ea5e9'
+const BOT_NAME = siteConfig.chatbot.botName
+const WELCOME = siteConfig.chatbot.openingMessage
+const SYSTEM_PROMPT = siteConfig.chatbot.systemPrompt
 
 interface Message { role: 'user' | 'assistant'; content: string }
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false)
+  const [visible, setVisible] = useState(false)
+
+  // Show floating button after 30s delay
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 30000)
+    return () => clearTimeout(timer)
+  }, [])
   const [messages, setMessages] = useState<Message[]>([{ role: 'assistant', content: WELCOME }])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -54,6 +60,8 @@ export default function ChatBot() {
 
   const onKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }
 
+  if (!visible) return null
+
   return (
     <>
       <button onClick={() => setOpen(o => !o)} aria-label="RoamBot"
@@ -63,7 +71,7 @@ export default function ChatBot() {
         {open ? (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         ) : (
-          <span style={{ fontSize: 22 }}>✈️</span>
+          <span style={{ fontSize: 22 }}>💬</span>
         )}
       </button>
 
@@ -72,10 +80,10 @@ export default function ChatBot() {
           <style>{`@keyframes rb-slide{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}} .rb-msg::-webkit-scrollbar{width:4px} .rb-msg::-webkit-scrollbar-thumb{background:${ACCENT}44;border-radius:2px} @keyframes rb-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}`}</style>
           <div style={{ padding: '12px 16px', borderBottom: `1px solid ${ACCENT}30`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: `${ACCENT}12` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: `linear-gradient(135deg, ${ACCENT}, #ea580c)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>✈️</div>
+              <div style={{ width: 34, height: 34, borderRadius: 8, background: `linear-gradient(135deg, ${ACCENT}, #0284c7)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>✈️</div>
               <div>
                 <div style={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>{BOT_NAME}</div>
-                <div style={{ color: '#fed7aa', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}/>Your AI travel companion</div>
+                <div style={{ color: '#7dd3fc', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}/>Your AI travel companion</div>
               </div>
             </div>
             <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: 4 }}>

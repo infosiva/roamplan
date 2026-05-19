@@ -3,6 +3,24 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import ShareCard from '@/components/ShareCard'
 import GuidedTour, { type TourStep } from '@/components/GuidedTour'
 import { useGate } from '@/lib/shared/useGate'
+import siteConfig from '@/site.config'
+
+// Fire-and-forget user stats ping to site-watchdog
+function pingStats(path: string) {
+  try {
+    fetch('http://31.97.56.148:3099/api/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        site: 'roamplan.app',
+        path,
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+        timestamp: new Date().toISOString(),
+      }),
+      keepalive: true,
+    }).catch(() => {}) // ignore errors
+  } catch { /* ignore */ }
+}
 
 const TRAVEL_TOUR: TourStep[] = [
   { target: '#planner', title: 'Plan any trip free', icon: '✈️', body: 'Type your destination, dates and interests — AI builds a full day-by-day itinerary in seconds.', placement: 'top' },
@@ -140,13 +158,7 @@ function printItinerary(itinerary: Itinerary, withKids: boolean) {
   win.print()
 }
 
-const DESTINATION_CARDS = [
-  { city: 'Bali',      emoji: '🌴', tag: 'Tropical',  gradient: 'from-[#0c4a6e] via-[#0e7490] to-[#ea580c]' },
-  { city: 'Paris',     emoji: '🗼', tag: 'Romance',   gradient: 'from-[#7c2d12] via-[#c2410c] to-[#b45309]' },
-  { city: 'Tokyo',     emoji: '⛩️',  tag: 'Culture',   gradient: 'from-[#831843] via-[#be185d] to-[#c2410c]' },
-  { city: 'New York',  emoji: '🗽', tag: 'Urban',     gradient: 'from-[#0c4a6e] via-[#1e40af] to-[#ea580c]' },
-  { city: 'Santorini', emoji: '🏛️', tag: 'Scenic',    gradient: 'from-[#1e3a5f] via-[#0369a1] to-[#f97316]' },
-]
+const DESTINATION_CARDS = siteConfig.destinations.slice(0, 5)
 
 const WHY_PRO = [
   { icon: '∞', title: 'Unlimited trips', desc: 'Generate as many itineraries as you want, any day.' },
@@ -155,11 +167,7 @@ const WHY_PRO = [
   { icon: '📄', title: 'Offline PDF export', desc: 'Download your full itinerary — no internet needed.' },
 ]
 
-const TRUST = [
-  { stat: '1,000+', label: 'Travelers planned with RoamPlan' },
-  { stat: '195+',   label: 'Destinations covered worldwide' },
-  { stat: '60s',    label: 'Average time to full itinerary' },
-]
+const TRUST = siteConfig.stats
 
 const SAMPLE_DAYS = [
   { day: 1, theme: 'Arrival & Old Town Wander', morning: 'Airport pickup → Hotel check-in', afternoon: 'Wander the old medina & local souks', evening: 'Rooftop dinner with panoramic views' },
@@ -186,7 +194,7 @@ export default function Home() {
   const formRef = useRef<HTMLDivElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Check Pro status + ?upgraded=1 param
+  // Check Pro status + ?upgraded=1 param + stats ping
   useEffect(() => {
     const stored = localStorage.getItem('roamplan-pro')
     if (stored) setIsPro(true)
@@ -196,6 +204,8 @@ export default function Home() {
       setIsPro(true)
       window.history.replaceState({}, '', '/')
     }
+    // Fire-and-forget stats ping
+    pingStats('/')
   }, [])
 
   async function handleUpgrade() {
@@ -241,7 +251,9 @@ export default function Home() {
     } finally { setLoading(false) }
   }
 
-  const inputCls = 'w-full bg-white/[0.06] border border-orange-900/30 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-orange-500/50 focus:bg-white/[0.09] transition-all'
+  const inputCls = 'w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.09] transition-all'
+
+  const [customizerOpen, setCustomizerOpen] = useState(false)
 
   return (
     <>
@@ -251,14 +263,13 @@ export default function Home() {
         freeLimit={2}
         freeFeature="itineraries"
         lockedFeature="unlimited itineraries"
-        accentColor="#f97316"
-        site="wanderai"
+        accentColor="#0ea5e9"
+        site="roamplan"
         onSuccess={onRegistered}
         onDismiss={dismissGate}
       />
     )}
 
-    {/* Pro upgrade success banner */}
     {isPro && (
       <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 text-white font-bold text-sm shadow-[0_8px_30px_rgba(249,115,22,0.50)] flex items-center gap-3 fade-up">
         <span>✈️</span> RoamPlan Pro unlocked — unlimited adventures ahead!
@@ -266,320 +277,219 @@ export default function Home() {
       </div>
     )}
 
-    <main className="min-h-screen relative z-10">
+    {/* Sticky mobile CTA */}
+    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden pb-safe"
+      style={{ background: 'rgba(6,8,15,0.95)', borderTop: '1px solid rgba(251,146,60,0.2)', backdropFilter: 'blur(20px)' }}>
+      <div className="px-4 py-3">
+        <button
+          onClick={() => { generate(); formRef.current?.scrollIntoView({ behavior: 'smooth' }) }}
+          disabled={!destination || loading}
+          className="w-full py-3.5 rounded-xl font-bold text-sm text-white disabled:opacity-40 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+          style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 4px 20px rgba(249,115,22,0.4)' }}>
+          {loading
+            ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Crafting itinerary...</>
+            : 'Generate itinerary →'}
+        </button>
+      </div>
+    </div>
 
-      {/* ── HERO — Travel Magazine ─────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-        <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="#06b6d4" />
+    <main className="min-h-screen relative z-10" style={{ background: '#06080f' }}>
 
-        {/* Animated warm ocean-to-coral gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0c2340] via-[#0c4a6e] to-[#1a1a2e]" />
+      {/* ── HERO ───────────────────────────────────────────────────────── */}
+      <section className="relative min-h-[100svh] flex flex-col items-center justify-center text-center px-5 overflow-hidden pt-16 pb-32 md:pb-20">
 
-        {/* Sunset glow orbs */}
-        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full opacity-25"
-          style={{ background: 'radial-gradient(circle, #0ea5e9 0%, transparent 70%)', filter: 'blur(80px)', animation: 'orbDrift 14s ease-in-out infinite alternate' }} />
-        <div className="absolute top-[10%] right-[-10%] w-[500px] h-[500px] rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, #f97316 0%, #fb923c 40%, transparent 70%)', filter: 'blur(80px)', animation: 'orbDrift 18s ease-in-out infinite alternate', animationDelay: '-6s' }} />
-        <div className="absolute bottom-[-5%] left-[20%] w-[400px] h-[400px] rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #f59e0b 0%, transparent 70%)', filter: 'blur(70px)', animation: 'orbDrift 22s ease-in-out infinite alternate', animationDelay: '-10s' }} />
+        {/* Spotlight — amber/orange tint to match CTA palette */}
+        <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="#f97316" />
 
-        {/* Floating destination silhouettes */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute bottom-0 left-0 right-0 h-48 opacity-10"
-            style={{ background: 'linear-gradient(to top, rgba(249,115,22,0.3) 0%, transparent 100%)' }} />
-          {/* Decorative horizon line */}
-          <div className="absolute bottom-32 left-0 right-0 h-px opacity-20"
-            style={{ background: 'linear-gradient(90deg, transparent, #f97316 20%, #fb923c 50%, #f97316 80%, transparent)' }} />
-        </div>
+        {/* Background glow orbs */}
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full opacity-20 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #f97316 0%, transparent 70%)', filter: 'blur(100px)' }} />
+        <div className="absolute bottom-[-5%] right-[-5%] w-[400px] h-[400px] rounded-full opacity-15 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #d97706 0%, transparent 70%)', filter: 'blur(80px)' }} />
 
-        {/* Depth grid */}
-        <div className="depth-grid absolute inset-0 opacity-30" />
+        {/* Subtle grid */}
+        <div className="depth-grid absolute inset-0 opacity-20 pointer-events-none" />
 
-        <div className="relative z-10 max-w-4xl mx-auto">
-          {/* Editorial badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-orange-500/40 bg-orange-900/25 backdrop-blur-sm text-orange-300 text-xs font-bold uppercase tracking-widest fade-up">
+        <div className="relative z-10 w-full max-w-3xl mx-auto">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-orange-500/30 bg-orange-950/30 backdrop-blur-sm text-orange-300 text-xs font-bold uppercase tracking-widest fade-up">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-            AI-Powered Travel Planning · Free
+            AI Travel Planner · Free
           </div>
 
-          {/* Big editorial headline */}
-          <h1 className="text-5xl md:text-7xl lg:text-[88px] font-black leading-[1.0] mb-6 text-white tracking-tight fade-up delay-100"
-            style={{ fontFamily: "'Georgia', 'Times New Roman', serif", letterSpacing: '-0.03em', textShadow: '0 2px 40px rgba(0,0,0,0.5)' }}>
-            Plan your<br />
+          {/* Headline */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[1.05] mb-5 text-white tracking-tight fade-up delay-100"
+            style={{ letterSpacing: '-0.03em' }}>
+            Plan your perfect trip{' '}
             <span style={{
-              background: 'linear-gradient(135deg, #fb923c 0%, #f97316 30%, #fbbf24 60%, #f59e0b 100%)',
+              background: 'linear-gradient(135deg, #fb923c 0%, #f97316 40%, #fbbf24 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-            }}>dream trip</span><br />
-            in seconds.
+            }}>in seconds</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto mb-10 leading-relaxed fade-up delay-200">
-            Tell AI where you want to go. Get a full day-by-day itinerary with hotels, restaurants, weather and hidden gems — free.
+          <p className="text-base md:text-lg text-white/50 max-w-lg mx-auto mb-10 leading-relaxed fade-up delay-200">
+            {siteConfig.subTagline}
           </p>
 
-          {/* Hero search bar — editorial card style */}
-          <div className="max-w-2xl mx-auto mb-6 fade-up delay-300"
+          {/* ── MAIN PLANNER CARD — all controls in one place ─── */}
+          <div ref={formRef} id="planner" className="w-full fade-up delay-300"
             style={{
-              background: 'rgba(255,255,255,0.07)',
+              background: 'rgba(255,255,255,0.05)',
               backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(249,115,22,0.25)',
-              borderRadius: '1rem',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+              border: '1px solid rgba(251,146,60,0.25)',
+              borderRadius: '1.25rem',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07)',
             }}>
-            <div className="flex gap-2 p-2">
-              <div className="flex items-center flex-1 gap-3 px-3">
-                <span className="text-orange-400/80 text-lg">✈️</span>
+
+            {/* Destination + Days + Generate */}
+            <div className="p-3 flex flex-col sm:flex-row gap-2">
+              {/* Destination input */}
+              <div className="flex items-center flex-1 gap-2.5 px-3 rounded-xl transition-all"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-orange-400/70 flex-shrink-0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 <input
                   value={destination}
                   onChange={e => setDestination(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && (generate(), formRef.current?.scrollIntoView({ behavior: 'smooth' }))}
-                  placeholder="Where do you want to go? Paris, Bali, Tokyo…"
-                  className="flex-1 bg-transparent py-3 text-sm text-white placeholder-white/35 focus:outline-none"
+                  onKeyDown={e => e.key === 'Enter' && generate()}
+                  placeholder="Where to? Paris, Bali, Tokyo…"
+                  className="flex-1 bg-transparent py-3 text-sm text-white placeholder-white/30 focus:outline-none"
                 />
               </div>
+
+              {/* Days selector */}
+              <div className="flex items-center gap-2 px-3 rounded-xl flex-shrink-0"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <button onClick={() => setDuration(d => Math.max(1, d - 1))}
+                  className="w-7 h-7 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center text-sm font-bold">−</button>
+                <span className="text-sm text-white font-semibold min-w-[60px] text-center">{duration} {duration === 1 ? 'day' : 'days'}</span>
+                <button onClick={() => setDuration(d => Math.min(14, d + 1))}
+                  className="w-7 h-7 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center text-sm font-bold">+</button>
+              </div>
+
+              {/* Generate CTA */}
+              {isLimited ? (
+                <a href="#pricing" className="px-6 py-3 rounded-xl text-sm font-bold text-white flex-shrink-0 flex items-center justify-center"
+                  style={{ background: 'rgba(124,45,2,0.4)', border: '1px solid rgba(180,83,9,0.4)' }}>
+                  Upgrade →
+                </a>
+              ) : (
+                <button
+                  onClick={generate}
+                  disabled={!destination || loading}
+                  className="px-6 py-3 rounded-xl text-sm font-bold flex-shrink-0 disabled:opacity-40 text-white transition-all hover:scale-[1.02] active:scale-[0.98] hidden sm:flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 4px 20px rgba(249,115,22,0.45)' }}>
+                  {loading
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating...</>
+                    : 'Generate →'}
+                </button>
+              )}
+            </div>
+
+            {/* Desktop generate button full-width when mobile */}
+            {!isLimited && (
+              <div className="px-3 pb-3 sm:hidden">
+                <button
+                  onClick={generate}
+                  disabled={!destination || loading}
+                  className="w-full py-3.5 rounded-xl text-sm font-bold disabled:opacity-40 text-white transition-all flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 4px 20px rgba(249,115,22,0.4)' }}>
+                  {loading
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Crafting itinerary...</>
+                    : 'Generate itinerary →'}
+                </button>
+              </div>
+            )}
+
+            {/* Customise toggle */}
+            <div className="px-4 pb-3">
               <button
-                onClick={() => { generate(); formRef.current?.scrollIntoView({ behavior: 'smooth' }) }}
-                disabled={!destination}
-                className="px-6 py-3 rounded-xl text-sm font-bold flex-shrink-0 disabled:opacity-40 text-white transition-all hover:scale-[1.02]"
-                style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 4px 20px rgba(249,115,22,0.4)' }}>
-                Plan my trip →
+                onClick={() => setCustomizerOpen(o => !o)}
+                className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                  className={`transition-transform duration-200 ${customizerOpen ? 'rotate-180' : ''}`}>
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+                {customizerOpen ? 'Hide options' : 'Customize'} · {budget} · {style} · {travelWith}
               </button>
             </div>
-          </div>
 
-          {/* Trust signals row */}
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-white/40 fade-up delay-400">
-            {TRUST.map((t, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                <span className="font-bold text-orange-400">{t.stat}</span>
-                {t.label}
-                {i < TRUST.length - 1 && <span className="ml-4 hidden sm:inline text-white/20">·</span>}
-              </span>
-            ))}
-          </div>
-        </div>
+            {/* Expandable customizer */}
+            {customizerOpen && (
+              <div className="px-4 pb-4 space-y-4 border-t border-white/[0.06] pt-4">
 
-        {/* Down arrow */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-white/30">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-        </div>
-      </section>
-
-      {/* ── DESTINATION CARDS — 5 cards with travel magazine feel ──────── */}
-      <section className="px-6 py-16 max-w-6xl mx-auto">
-        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/60 text-center mb-6">Popular destinations</div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-          {DESTINATION_CARDS.map(card => (
-            <CardContainer key={card.city} containerClassName="w-full">
-              <CardBody className="w-full">
-                <CardItem translateZ={40} className="w-full">
-                  <button
-                    onClick={() => setDestination(card.city)}
-                    className={`group relative overflow-hidden rounded-2xl aspect-[3/4] md:aspect-[2/3] bg-gradient-to-br ${card.gradient} transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-full`}
-                    style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
-                    {/* Texture overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    {/* Glow on hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ background: 'radial-gradient(circle at 50% 80%, rgba(249,115,22,0.25) 0%, transparent 70%)' }} />
-                    <div className="relative z-10 flex flex-col items-center justify-end h-full pb-5 gap-1.5">
-                      <CardItem translateZ={60} className="text-4xl md:text-5xl drop-shadow-lg mb-1 group-hover:scale-110 transition-transform duration-300">
-                        {card.emoji}
-                      </CardItem>
-                      <CardItem translateZ={50} className="font-black text-base md:text-lg text-white tracking-tight" style={{ fontFamily: "'Georgia', serif", textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                        {card.city}
-                      </CardItem>
-                      <CardItem translateZ={40} className="px-2.5 py-0.5 rounded-full text-white/70 text-[10px] font-semibold uppercase tracking-wider" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}>
-                        {card.tag}
-                      </CardItem>
+                {/* Travelling With */}
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2 block">Travelling with</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {TRAVEL_WITH.map(tw => (
+                      <button key={tw} onClick={() => setTravelWith(tw)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${travelWith === tw
+                          ? 'bg-orange-500/20 border border-orange-500/40 text-orange-300'
+                          : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70'}`}>
+                        {tw}
+                      </button>
+                    ))}
+                  </div>
+                  {withKids && (
+                    <div className="mt-2 px-3 py-2 rounded-xl text-orange-200 text-xs"
+                      style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.18)' }}>
+                      Kids mode on — itinerary includes family-friendly spots and timings.
                     </div>
-                    {/* Hover CTA */}
-                    <div className="absolute inset-x-0 bottom-0 py-2 flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0"
-                      style={{ background: 'linear-gradient(to top, rgba(249,115,22,0.6), transparent)' }}>
-                      <span className="text-[11px] text-orange-200 font-bold">Plan this trip →</span>
-                    </div>
-                  </button>
-                </CardItem>
-              </CardBody>
-            </CardContainer>
-          ))}
-        </div>
-      </section>
+                  )}
+                </div>
 
-      {/* ── SAMPLE ITINERARY MOCKUP — editorial teaser ─────────────────── */}
-      <section className="px-6 pb-16 max-w-5xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/60 mb-3">What you get</div>
-          <h2 className="text-3xl md:text-4xl font-black text-white" style={{ fontFamily: "'Georgia', serif" }}>
-            A full day-by-day itinerary, instantly.
-          </h2>
-        </div>
-        <div className="rounded-2xl overflow-hidden"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(249,115,22,0.15)',
-            backdropFilter: 'blur(20px)',
-          }}>
-          {/* Mock header */}
-          <div className="px-6 py-5 flex items-center justify-between"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(249,115,22,0.05)' }}>
-            <div>
-              <h3 className="text-2xl font-black text-white" style={{ fontFamily: "'Georgia', serif" }}>Bali, Indonesia</h3>
-              <p className="text-white/40 text-sm mt-0.5">7-day itinerary · Moderate budget · Culture & Food focus</p>
-            </div>
-            <div className="px-3 py-1.5 rounded-xl text-sm font-semibold text-amber-400"
-              style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.25)' }}>
-              Est. $1,200–$1,800
-            </div>
-          </div>
-          {/* Mock days */}
-          <div className="divide-y divide-white/[0.04]">
-            {SAMPLE_DAYS.map((day, i) => (
-              <div key={i} className="px-6 py-5 flex gap-5 items-start hover:bg-white/[0.02] transition-colors">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-sm flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #f97316, #d97706)' }}>{day.day}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-white text-sm mb-2" style={{ fontFamily: "'Georgia', serif" }}>{day.theme}</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {[
-                      { label: '🌅 Morning', text: day.morning },
-                      { label: '☀️ Afternoon', text: day.afternoon },
-                      { label: '🌙 Evening', text: day.evening },
-                    ].map((period, j) => (
-                      <div key={j} className="rounded-lg px-3 py-2.5"
-                        style={{ background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.12)' }}>
-                        <div className="text-[10px] text-orange-300/50 uppercase tracking-wider mb-1">{period.label}</div>
-                        <div className="text-xs text-white/70 leading-relaxed">{period.text}</div>
-                      </div>
+                {/* Budget + Style */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2 block">Budget</label>
+                    <div className="flex gap-1">
+                      {BUDGETS.map(b => (
+                        <button key={b} onClick={() => setBudget(b)} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${budget === b ? 'bg-amber-700/20 border border-amber-600/40 text-amber-300' : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70'}`}>{b}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2 block">Style</label>
+                    <div className="flex gap-1">
+                      {STYLES.map(s => (
+                        <button key={s} onClick={() => setStyle(s)} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${style === s ? 'bg-orange-700/20 border border-orange-600/40 text-orange-300' : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70'}`}>{s}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Interests — horizontal scroll strip */}
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2 block">Interests</label>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
+                    {INTERESTS.map(i => (
+                      <button key={i} onClick={() => toggleInterest(i)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0 transition-all ${interests.includes(i) ? 'bg-orange-500/20 border border-orange-500/40 text-orange-300' : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70'}`}>
+                        {i}
+                      </button>
                     ))}
                   </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
-          {/* Fade + CTA */}
-          <div className="relative px-6 py-8 text-center"
-            style={{ background: 'linear-gradient(to bottom, rgba(12,36,64,0.0) 0%, rgba(12,36,64,0.95) 100%)' }}>
-            <p className="text-white/50 text-sm mb-4">+ 4 more days generated for your trip…</p>
-            <button
-              onClick={() => { setDestination('Bali'); formRef.current?.scrollIntoView({ behavior: 'smooth' }) }}
-              className="px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-[1.03]"
-              style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 8px 30px rgba(249,115,22,0.35)' }}>
-              Generate your own free itinerary →
-            </button>
+
+          {/* Social proof bar */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-white/35 fade-up delay-400">
+            <span>100+ destinations</span>
+            <span className="text-white/15">·</span>
+            <span>Free itinerary</span>
+            <span className="text-white/15">·</span>
+            <span>No signup needed</span>
           </div>
         </div>
       </section>
 
-      {/* ── PLANNER FORM ───────────────────────────────────────────────── */}
-      <div ref={formRef} id="planner" className="max-w-2xl mx-auto px-6 pb-14">
-        <div className="rounded-2xl p-8"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(249,115,22,0.18)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
-          }}>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-black"
-              style={{ background: 'linear-gradient(135deg, #f97316, #d97706)' }}>✈</div>
-            <h2 className="text-xl font-black text-white tracking-tight" style={{ fontFamily: "'Georgia', serif" }}>Customise your trip</h2>
-          </div>
-
-          {/* Destination + Duration */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-            <div className="md:col-span-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-2 block">Where to?</label>
-              <input value={destination} onChange={e => setDestination(e.target.value)} onKeyDown={e => e.key === 'Enter' && generate()} placeholder="Paris, Tokyo, Bali, New York…" className={inputCls} />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-2 block">Duration — <span className="text-orange-400 font-semibold normal-case">{duration} {duration === 1 ? 'day' : 'days'}</span></label>
-              <input type="range" min={1} max={14} value={duration} onChange={e => setDuration(Number(e.target.value))} className="w-full mt-3 accent-orange-500" />
-              <div className="flex justify-between text-[10px] text-white/20 mt-1">
-                <span>1 day</span><span>1 week</span><span>2 weeks</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Travelling With */}
-          <div className="mb-6">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-3 block">Travelling with</label>
-            <div className="flex flex-wrap gap-2">
-              {TRAVEL_WITH.map(tw => (
-                <button key={tw} onClick={() => setTravelWith(tw)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${travelWith === tw
-                    ? tw === 'Family with Kids' ? 'bg-orange-500/25 border border-orange-500/50 text-orange-300' : 'bg-amber-600/20 border border-amber-600/40 text-amber-300'
-                    : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20'}`}>
-                  {tw === 'Family with Kids' ? '🧒 ' : tw === 'Couple' ? '💑 ' : tw === 'Solo' ? '🎒 ' : tw === 'Friends Group' ? '👥 ' : '👴 '}{tw}
-                </button>
-              ))}
-            </div>
-            {withKids && (
-              <div className="mt-3 px-4 py-3 rounded-xl text-orange-200 text-sm"
-                style={{ background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)' }}>
-                🎠 <strong>Kids mode on!</strong> Your itinerary will include kid-friendly spots, playgrounds, child-appropriate timings, and family dining recommendations.
-              </div>
-            )}
-          </div>
-
-          {/* Budget + Style */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-2 block">Budget</label>
-              <div className="flex gap-1.5">
-                {BUDGETS.map(b => (
-                  <button key={b} onClick={() => setBudget(b)} className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition-all ${budget === b ? 'bg-amber-700/20 border border-amber-600/40 text-amber-300' : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70'}`}>{b}</button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-2 block">Travel style</label>
-              <div className="flex gap-1.5">
-                {STYLES.map(s => (
-                  <button key={s} onClick={() => setStyle(s)} className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition-all ${style === s ? 'bg-teal-700/20 border border-teal-600/40 text-teal-300' : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70'}`}>{s}</button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Interests */}
-          <div className="mb-6">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-3 block">Your interests</label>
-            <div className="flex flex-wrap gap-2">
-              {INTERESTS.map(i => (
-                <button key={i} onClick={() => toggleInterest(i)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${interests.includes(i) ? 'bg-teal-500/20 border border-teal-500/40 text-teal-300' : 'bg-white/[0.04] border border-white/10 text-white/40 hover:text-white/70'}`}>{i}</button>
-              ))}
-            </div>
-          </div>
-
-          {isLimited ? (
-            <div className="w-full py-4 rounded-xl text-center"
-              style={{ background: 'rgba(124,45,2,0.2)', border: '1px solid rgba(180,83,9,0.3)' }}>
-              <p className="text-orange-400 font-semibold text-sm mb-1">Daily limit reached (2 free / day)</p>
-              <a href="#pricing" className="text-xs text-orange-600 hover:text-orange-400 underline">Upgrade to Pro for unlimited itineraries →</a>
-            </div>
-          ) : (
-            <button onClick={generate} disabled={!destination || loading}
-              className={`w-full py-4 rounded-xl font-bold text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2 text-white`}
-              style={{
-                background: withKids
-                  ? 'linear-gradient(135deg, #f97316, #f59e0b)'
-                  : 'linear-gradient(135deg, #f97316, #e11d48)',
-                boxShadow: '0 8px 30px rgba(249,115,22,0.35)',
-              }}>
-              {loading
-                ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Crafting your itinerary...</>
-                : withKids ? `🧒 Generate family itinerary ✦ (${remaining} free left)` : `✈️ Generate itinerary ✦ (${remaining} free left)`
-              }
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── RESULTS ────────────────────────────────────────────────────── */}
-      <div ref={resultsRef} className="max-w-4xl mx-auto px-6 pb-24">
+      {/* ── RESULTS — in-place below hero ──────────────────────────────── */}
+      <div ref={resultsRef} className="max-w-4xl mx-auto px-5 pb-16">
         {apiError && (
           <div className="rounded-2xl border border-red-500/30 p-6 text-center mb-8"
             style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)' }}>
@@ -600,25 +510,25 @@ export default function Home() {
                     <span className="px-3 py-1 rounded-full text-orange-300 text-xs font-bold uppercase tracking-wider"
                       style={{ background: 'rgba(124,45,2,0.4)', border: '1px solid rgba(180,83,9,0.4)' }}>{itinerary.duration} Days</span>
                     {withKids && <span className="px-2.5 py-1 rounded-full text-orange-300 text-xs font-semibold"
-                      style={{ background: 'rgba(249,115,22,0.2)', border: '1px solid rgba(249,115,22,0.3)' }}>🧒 Family</span>}
+                      style={{ background: 'rgba(249,115,22,0.2)', border: '1px solid rgba(249,115,22,0.3)' }}>Family</span>}
                   </div>
                   <p className="text-white/50 text-sm max-w-2xl leading-relaxed">{itinerary.overview}</p>
                 </div>
                 <div className="flex gap-2 items-start flex-shrink-0 flex-wrap">
                   <div className="px-4 py-2 rounded-xl text-sm"
                     style={{ background: 'rgba(120,53,15,0.3)', border: '1px solid rgba(180,83,9,0.3)' }}>
-                    <span className="text-white/40 text-xs">Est. budget </span>
+                    <span className="text-white/40 text-xs">Est. </span>
                     <span className="text-amber-400 font-bold">{itinerary.budget_estimate}</span>
                   </div>
                   <button onClick={() => printItinerary(itinerary, withKids)}
                     className="px-3 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white transition-all flex items-center gap-1.5"
                     style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }}>
-                    🖨️ Print
+                    Print
                   </button>
                   <button onClick={() => { setItinerary(null); setApiError(null); setShowWeather(false); formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
                     className="px-3 py-2 rounded-xl text-xs font-medium text-orange-300/80 hover:text-orange-300 transition-all flex items-center gap-1.5"
                     style={{ border: '1px solid rgba(249,115,22,0.25)', background: 'rgba(249,115,22,0.08)' }}>
-                    ✈️ Plan another trip
+                    Plan another
                   </button>
                 </div>
               </div>
@@ -630,7 +540,7 @@ export default function Home() {
             {/* Kids essentials */}
             {withKids && itinerary.kids_essentials && itinerary.kids_essentials.length > 0 && (
               <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(249,115,22,0.25)', backdropFilter: 'blur(20px)' }}>
-                <h3 className="font-semibold mb-3 flex items-center gap-2 text-orange-300">🎒 Family Essentials</h3>
+                <h3 className="font-semibold mb-3 flex items-center gap-2 text-orange-300">Family Essentials</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {itinerary.kids_essentials.map((tip, i) => (
                     <div key={i} className="text-sm text-white/70 flex items-start gap-2">
@@ -651,13 +561,13 @@ export default function Home() {
                       style={{ background: 'linear-gradient(135deg, #f97316, #d97706)' }}>{day.day}</div>
                     <div>
                       <div className="font-bold text-lg text-white" style={{ fontFamily: "'Georgia', serif" }}>{day.theme}</div>
-                      {day.tips && <div className="text-xs text-white/40 mt-0.5">💡 {day.tips}</div>}
+                      {day.tips && <div className="text-xs text-white/40 mt-0.5">{day.tips}</div>}
                     </div>
                   </div>
                   {withKids && day.kids_highlight && (
                     <div className="px-3 py-1.5 rounded-xl text-orange-200 text-xs font-medium"
                       style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.25)' }}>
-                      🎠 {day.kids_highlight}
+                      {day.kids_highlight}
                     </div>
                   )}
                 </div>
@@ -672,11 +582,9 @@ export default function Home() {
                         <div className="font-semibold text-sm mb-1 text-white">{act.activity}</div>
                         <div className="text-xs text-white/40">{act.location}</div>
                         <div className="text-xs text-white/30 mt-1">{act.duration}</div>
-                        {act.cost && <div className="text-xs text-teal-400 mt-1">{act.cost}</div>}
+                        {act.cost && <div className="text-xs text-amber-400 mt-1">{act.cost}</div>}
                         {withKids && act.kids_tip && (
-                          <div className="text-xs text-orange-300 mt-2 flex items-start gap-1">
-                            <span className="flex-shrink-0">🧒</span> {act.kids_tip}
-                          </div>
+                          <div className="text-xs text-orange-300 mt-2">{act.kids_tip}</div>
                         )}
                       </div>
                     )
@@ -688,7 +596,7 @@ export default function Home() {
             {/* Practical tips */}
             {itinerary.practical_tips?.length > 0 && (
               <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(249,115,22,0.12)', backdropFilter: 'blur(20px)' }}>
-                <h3 className="font-semibold mb-4 flex items-center gap-2 text-amber-300">✦ Practical Tips</h3>
+                <h3 className="font-semibold mb-4 text-amber-300">Practical Tips</h3>
                 <ul className="space-y-2">
                   {itinerary.practical_tips.map((tip, i) => (
                     <li key={i} className="text-sm text-white/70 flex items-start gap-2">
@@ -701,7 +609,6 @@ export default function Home() {
 
             {/* Actions */}
             <div className="flex flex-wrap justify-center gap-3 pt-2">
-              {/* Save trip */}
               <button onClick={() => {
                 try {
                   const saved = JSON.parse(localStorage.getItem('roamplan-saved') ?? '[]')
@@ -709,24 +616,22 @@ export default function Home() {
                   if (!exists) {
                     saved.unshift({ ...itinerary, savedAt: new Date().toISOString() })
                     localStorage.setItem('roamplan-saved', JSON.stringify(saved.slice(0, 10)))
-                    alert('✅ Trip saved! Access it anytime from this device.')
+                    alert('Trip saved!')
                   } else {
-                    alert('Trip already saved!')
+                    alert('Already saved!')
                   }
                 } catch { alert('Could not save trip.') }
               }}
                 className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
                 style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                🔖 Save Trip
+                Save Trip
               </button>
-              {/* WhatsApp share */}
               <a href={`https://wa.me/?text=${encodeURIComponent(`✈️ My ${itinerary.destination} trip plan (${itinerary.duration} days)\n💰 ${itinerary.budget_estimate}\n\n${(itinerary.days ?? []).slice(0, 3).map(d => `Day ${d.day}: ${d.theme}`).join('\n')}\n\nPlan yours free → roamplan.app`)}`}
                 target="_blank" rel="noopener noreferrer"
                 className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
                 style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                💬 Share on WhatsApp
+                Share on WhatsApp
               </a>
-              {/* Generate packing list */}
               <button onClick={() => {
                 const items = [
                   '📄 Passport & travel docs', '💊 Medications', '🔌 Universal adapter',
@@ -736,16 +641,16 @@ export default function Home() {
                   withKids ? '🩹 First aid kit' : '🎧 Headphones',
                   '☀️ Sunscreen', '📷 Camera / phone charger',
                 ]
-                alert(`📋 Packing list for ${itinerary.destination}:\n\n${items.join('\n')}`)
+                alert(`Packing list for ${itinerary.destination}:\n\n${items.join('\n')}`)
               }}
                 className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
                 style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                📋 Packing List
+                Packing List
               </button>
               <button onClick={() => printItinerary(itinerary, withKids)}
                 className="px-6 py-3 rounded-xl text-sm font-medium text-white/60 hover:text-white transition-all flex items-center gap-2"
                 style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                🖨️ Print / PDF
+                Print / PDF
               </button>
               <ShareCard
                 title={`${itinerary.destination} — ${itinerary.duration} Days`}
@@ -764,170 +669,241 @@ export default function Home() {
         )}
       </div>
 
-      {/* ── WHY PRO ────────────────────────────────────────────────────── */}
-      <section className="px-6 py-20" style={{ borderTop: '1px solid rgba(124,45,2,0.2)' }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/60 mb-3">Why Pro?</div>
-            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight" style={{ fontFamily: "'Georgia', serif" }}>
-              Travel smarter, not harder
-            </h2>
-            <p className="text-white/40 text-sm mt-3">Everything you need for flawless trips, for just $8/month.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {WHY_PRO.map((item, i) => (
-              <div key={i} className="rounded-2xl p-6 group transition-all hover:-translate-y-1"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(249,115,22,0.12)',
-                  backdropFilter: 'blur(20px)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-                }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"
-                  style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.25)' }}>
-                  {item.icon}
+      {/* ── DESTINATION CARDS ───────────────────────────────────────────── */}
+      <section id="destinations" className="px-5 py-14 max-w-6xl mx-auto">
+        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/50 text-center mb-6">Popular destinations</div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+          {DESTINATION_CARDS.map(card => (
+            <CardContainer key={card.city} containerClassName="w-full">
+              <CardBody className="w-full">
+                <CardItem translateZ={40} className="w-full">
+                  <button
+                    onClick={() => setDestination(card.city)}
+                    className={`group relative overflow-hidden rounded-2xl aspect-[3/4] md:aspect-[2/3] bg-gradient-to-br ${card.gradient} transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-full`}
+                    style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ background: 'radial-gradient(circle at 50% 80%, rgba(249,115,22,0.25) 0%, transparent 70%)' }} />
+                    <div className="relative z-10 flex flex-col items-center justify-end h-full pb-5 gap-1.5">
+                      <CardItem translateZ={60} className="text-4xl md:text-5xl drop-shadow-lg mb-1 group-hover:scale-110 transition-transform duration-300">
+                        {card.emoji}
+                      </CardItem>
+                      <CardItem translateZ={50} className="font-black text-base md:text-lg text-white tracking-tight" style={{ fontFamily: "'Georgia', serif", textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                        {card.city}
+                      </CardItem>
+                      <CardItem translateZ={40} className="px-2.5 py-0.5 rounded-full text-white/70 text-[10px] font-semibold uppercase tracking-wider" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                        {card.tag}
+                      </CardItem>
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 py-2 flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0"
+                      style={{ background: 'linear-gradient(to top, rgba(249,115,22,0.6), transparent)' }}>
+                      <span className="text-[11px] text-orange-200 font-bold">Plan this trip →</span>
+                    </div>
+                  </button>
+                </CardItem>
+              </CardBody>
+            </CardContainer>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ────────────────────────────────────────────────── */}
+      <section id="how-it-works" className="px-5 py-14 max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/50 mb-3">How it works</div>
+          <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">Three steps to your perfect trip</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[
+            { step: '01', title: 'Tell AI your destination', desc: 'Enter where you want to go, travel dates, interests, budget, and whether you\'re solo, couple, or family.' },
+            { step: '02', title: 'Get a custom itinerary', desc: 'AI builds a full day-by-day plan with activities, dining, weather, and budget breakdown in under 60 seconds.' },
+            { step: '03', title: 'Book and go', desc: 'Download as PDF, share with travel companions, and head off knowing every day is planned.' },
+          ].map((item, i) => (
+            <div key={i} className="relative rounded-2xl p-6"
+              style={{ background: 'rgba(249,115,22,0.04)', border: '1px solid rgba(249,115,22,0.12)', backdropFilter: 'blur(16px)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/50 mb-2">Step {item.step}</div>
+              <h3 className="text-base font-bold text-white mb-2">{item.title}</h3>
+              <p className="text-sm text-white/45 leading-relaxed">{item.desc}</p>
+              {i < 2 && (
+                <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 text-orange-400/30 z-10">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
-                <h3 className="font-bold text-white text-sm mb-2">{item.title}</h3>
-                <p className="text-xs text-white/45 leading-relaxed">{item.desc}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── SAMPLE ITINERARY MOCKUP ──────────────────────────────────────── */}
+      <section className="px-5 pb-14 max-w-5xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/50 mb-3">What you get</div>
+          <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">A full day-by-day itinerary, instantly.</h2>
+        </div>
+        <div className="rounded-2xl overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(249,115,22,0.15)', backdropFilter: 'blur(20px)' }}>
+          <div className="px-6 py-5 flex items-center justify-between flex-wrap gap-3"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(249,115,22,0.04)' }}>
+            <div>
+              <h3 className="text-xl font-black text-white" style={{ fontFamily: "'Georgia', serif" }}>Bali, Indonesia</h3>
+              <p className="text-white/40 text-xs mt-0.5">7-day itinerary · Moderate budget · Culture & Food focus</p>
+            </div>
+            <div className="px-3 py-1.5 rounded-xl text-sm font-semibold text-amber-400"
+              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.22)' }}>
+              Est. $1,200–$1,800
+            </div>
+          </div>
+          <div className="divide-y divide-white/[0.04]">
+            {SAMPLE_DAYS.map((day, i) => (
+              <div key={i} className="px-6 py-4 flex gap-4 items-start hover:bg-white/[0.02] transition-colors">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-sm flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #f97316, #d97706)' }}>{day.day}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-white text-sm mb-1.5" style={{ fontFamily: "'Georgia', serif" }}>{day.theme}</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                    {[{ label: '🌅 Morning', text: day.morning }, { label: '☀️ Afternoon', text: day.afternoon }, { label: '🌙 Evening', text: day.evening }].map((period, j) => (
+                      <div key={j} className="rounded-lg px-3 py-2" style={{ background: 'rgba(249,115,22,0.05)', border: '1px solid rgba(249,115,22,0.1)' }}>
+                        <div className="text-[10px] text-orange-300/45 uppercase tracking-wider mb-0.5">{period.label}</div>
+                        <div className="text-xs text-white/60 leading-relaxed">{period.text}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
+          </div>
+          <div className="px-6 py-6 text-center" style={{ background: 'linear-gradient(to bottom, rgba(6,8,15,0) 0%, rgba(6,8,15,0.9) 100%)' }}>
+            <p className="text-white/40 text-sm mb-4">+ 4 more days generated for your trip…</p>
+            <button onClick={() => { setDestination('Bali'); formRef.current?.scrollIntoView({ behavior: 'smooth' }) }}
+              className="px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-[1.03]"
+              style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 8px 30px rgba(249,115,22,0.35)' }}>
+              Generate your own free itinerary →
+            </button>
           </div>
         </div>
       </section>
 
-      {/* ── PRICING ────────────────────────────────────────────────────── */}
-      <section id="pricing" className="px-6 py-20">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10">
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/60 mb-3">Pricing</div>
-            <h2 className="text-4xl font-black text-white tracking-tight mb-2" style={{ fontFamily: "'Georgia', serif" }}>
-              Start planning free
-            </h2>
+      {/* ── PRICING — 2-col compressed ─────────────────────────────────── */}
+      <section id="pricing" className="px-5 py-14" style={{ borderTop: '1px solid rgba(249,115,22,0.1)' }}>
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/50 mb-3">Pricing</div>
+            <h2 className="text-3xl font-black text-white tracking-tight mb-1.5">Start planning free</h2>
             <p className="text-white/35 text-sm">2 free itineraries per day · No card required</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Free plan */}
-            <div className="rounded-2xl p-8" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}>
-              <div className="text-xs font-bold uppercase tracking-widest text-white/30 mb-1">Free</div>
-              <div className="text-5xl font-black text-white/30 mb-0.5">$0</div>
-              <div className="text-sm text-white/20 mb-6">forever</div>
-              <ul className="space-y-2.5 mb-8">
-                {['2 itineraries / day', 'Up to 14 days', 'Weather forecast', 'Kids family mode', 'Print to PDF', 'All destinations'].map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-white/35">
-                    <span className="text-white/20 mt-0.5">•</span> {f}
+            <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(20px)' }}>
+              <div className="text-xs font-bold uppercase tracking-widest text-white/25 mb-1">Free</div>
+              <div className="text-4xl font-black text-white/25 mb-0.5">$0</div>
+              <div className="text-xs text-white/20 mb-5">forever</div>
+              <ul className="space-y-2 mb-6">
+                {['2 itineraries / day', 'Up to 14 days', 'Weather forecast', 'Kids family mode', 'Print to PDF'].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-white/30">
+                    <span className="text-white/15 mt-0.5">•</span> {f}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 font-bold text-sm text-white/30 rounded-xl cursor-default"
-                style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+              <button className="w-full py-2.5 font-bold text-sm text-white/25 rounded-xl cursor-default"
+                style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
                 Start free
               </button>
             </div>
             {/* Pro plan */}
-            <div className="rounded-2xl p-8 relative"
+            <div className="rounded-2xl p-6 relative"
               style={{
-                background: 'linear-gradient(135deg, rgba(124,45,2,0.3) 0%, rgba(30,58,138,0.2) 100%)',
-                border: '1px solid rgba(249,115,22,0.35)',
+                background: 'linear-gradient(135deg, rgba(124,45,2,0.25) 0%, rgba(6,8,15,0.5) 100%)',
+                border: '1px solid rgba(249,115,22,0.3)',
                 backdropFilter: 'blur(24px)',
-                boxShadow: '0 20px 60px rgba(249,115,22,0.15)',
+                boxShadow: '0 16px 48px rgba(249,115,22,0.12)',
               }}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-white text-[11px] font-bold uppercase tracking-widest shadow-lg"
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-white text-[10px] font-bold uppercase tracking-widest shadow-lg"
                 style={{ background: 'linear-gradient(135deg, #f97316, #d97706)' }}>
                 Most Popular
               </div>
               <div className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-1">Pro</div>
-              <div className="text-5xl font-black text-white mb-0.5">$8</div>
-              <div className="text-sm text-white/45 mb-6">/month</div>
-              <ul className="space-y-2.5 mb-8">
-                {['Unlimited itineraries', 'Multi-city routing', 'Hotel recommendations', 'Offline PDF export', 'Custom trip notes', 'Priority AI speed'].map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-white/75">
+              <div className="text-4xl font-black text-white mb-0.5">$8</div>
+              <div className="text-xs text-white/40 mb-5">/month</div>
+              <ul className="space-y-2 mb-6">
+                {['Unlimited itineraries', 'Multi-city routing', 'Hotel recommendations', 'Offline PDF export', 'Priority AI speed'].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-white/70">
                     <span className="text-orange-400 mt-0.5">✓</span> {f}
                   </li>
                 ))}
               </ul>
               {isPro ? (
-                <div className="w-full py-3 font-bold text-sm text-center text-emerald-400 rounded-xl"
+                <div className="w-full py-2.5 font-bold text-sm text-center text-emerald-400 rounded-xl"
                   style={{ border: '1px solid rgba(52,211,153,0.3)', background: 'rgba(52,211,153,0.1)' }}>
-                  ✓ Pro active — enjoy unlimited trips!
+                  Pro active — enjoy unlimited trips!
                 </div>
               ) : (
-                <button
-                  onClick={handleUpgrade}
-                  disabled={checkoutLoading}
-                  className="w-full py-3 font-bold text-sm text-white rounded-xl transition-all hover:scale-[1.02] disabled:opacity-60 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 8px 30px rgba(249,115,22,0.40)' }}>
-                  {checkoutLoading ? (
-                    <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redirecting...</>
-                  ) : 'Go Pro — $8/mo →'}
+                <button onClick={handleUpgrade} disabled={checkoutLoading}
+                  className="w-full py-2.5 font-bold text-sm text-white rounded-xl transition-all hover:scale-[1.02] disabled:opacity-60 flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #f97316, #d97706)', boxShadow: '0 6px 24px rgba(249,115,22,0.35)' }}>
+                  {checkoutLoading
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redirecting...</>
+                    : 'Go Pro — $8/mo →'}
                 </button>
               )}
-            </div>
-          </div>
-
-          {/* Social proof under pricing */}
-          <div className="mt-10 px-8 py-5 rounded-2xl flex flex-wrap items-center justify-between gap-4"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(20px)' }}>
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {['🧑‍🌾','👩‍💼','🧔','👩‍🎨','🧑‍💻'].map((e,i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm"
-                    style={{ background: 'rgba(124,45,2,0.5)', borderColor: 'rgba(124,45,2,0.8)' }}>{e}</div>
-                ))}
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-white">Loved by travellers worldwide</div>
-                <div className="text-xs text-white/40">Trusted by 1,000+ explorers · 4.9 ★ average</div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-white/30">No credit card · Cancel anytime</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FLIGHT PRICE TRACKER TEASER ────────────────────────────────── */}
-      <section className="px-6 pb-20 max-w-4xl mx-auto">
-        <div className="rounded-2xl px-8 py-8 text-center relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, rgba(12,74,110,0.4) 0%, rgba(124,45,2,0.35) 100%)',
-            border: '1px solid rgba(249,115,22,0.2)',
-            backdropFilter: 'blur(24px)',
-          }}>
-          <div className="absolute inset-0 opacity-15"
+      {/* ── WHY PRO ────────────────────────────────────────────────────── */}
+      <section className="px-5 py-14 max-w-5xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400/50 mb-3">Why Pro?</div>
+          <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">Travel smarter, not harder</h2>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {WHY_PRO.map((item, i) => (
+            <div key={i} className="rounded-2xl p-5 group transition-all hover:-translate-y-1"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(249,115,22,0.1)', backdropFilter: 'blur(20px)' }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform"
+                style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.2)' }}>
+                {item.icon}
+              </div>
+              <h3 className="font-bold text-white text-sm mb-1.5">{item.title}</h3>
+              <p className="text-xs text-white/40 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── FLIGHT TRACKER TEASER ───────────────────────────────────────── */}
+      <section className="px-5 pb-14 max-w-4xl mx-auto">
+        <div className="rounded-2xl px-7 py-7 text-center relative overflow-hidden"
+          style={{ background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.15)', backdropFilter: 'blur(24px)' }}>
+          <div className="absolute inset-0 opacity-10 pointer-events-none"
             style={{ background: 'radial-gradient(ellipse at 50% 100%, #f97316 0%, transparent 60%)' }} />
           <div className="relative z-10">
-            <div className="text-2xl mb-3">✈️ 💰</div>
-            <h3 className="text-xl font-black text-white mb-2" style={{ fontFamily: "'Georgia', serif" }}>
-              Flight & Currency Tracker — Coming Soon
-            </h3>
-            <p className="text-white/50 text-sm max-w-lg mx-auto">
-              Track live flight prices, get fare alerts, and see real-time currency exchange rates for your destination — all inside RoamPlan Pro.
-            </p>
-            <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full text-orange-300 text-xs font-bold uppercase tracking-widest"
-              style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.25)' }}>
+            <h3 className="text-lg font-black text-white mb-2">Flight & Currency Tracker — Coming Soon</h3>
+            <p className="text-white/45 text-sm max-w-lg mx-auto">Live flight prices, fare alerts, and real-time exchange rates — all inside RoamPlan Pro.</p>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-orange-300 text-xs font-bold uppercase tracking-widest"
+              style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.22)' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" /> Pro feature · Coming 2026
             </div>
           </div>
         </div>
       </section>
 
-      <GuidedTour steps={TRAVEL_TOUR} storageKey="roamplan_tour_v1" accentColor="#0ea5e9" />
+      <GuidedTour steps={TRAVEL_TOUR} storageKey="roamplan_tour_v1" accentColor="#f97316" />
 
       {/* Competitor comparison */}
-      <section style={{ borderTop:'1px solid rgba(14,165,233,0.15)', padding:'48px 24px' }}>
-        <div style={{ maxWidth:800, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:32 }}>
-            <p style={{ fontSize:10, color:'rgba(14,165,233,0.5)', letterSpacing:'0.15em', textTransform:'uppercase', marginBottom:8 }}>How we compare</p>
-            <h2 style={{ fontSize:20, fontWeight:800, color:'#f0f9ff' }}>RoamPlan vs alternatives</h2>
+      <section style={{ borderTop: '1px solid rgba(249,115,22,0.1)', padding: '48px 20px' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <p style={{ fontSize: 10, color: 'rgba(249,115,22,0.45)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>How we compare</p>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>RoamPlan vs alternatives</h2>
           </div>
-          <div style={{ overflowX:'auto' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
-                <tr style={{ borderBottom:'1px solid rgba(14,165,233,0.2)' }}>
-                  {['Feature','RoamPlan','TripAdvisor','Google Trips','Airbnb'].map((h,i) => (
-                    <th key={h} style={{ padding:'10px 12px', textAlign:i===0?'left':'center',
-                      color: i===1 ? '#0ea5e9' : 'rgba(255,255,255,0.3)', fontWeight:700, fontSize:11, letterSpacing:'0.05em' }}>{h}</th>
+                <tr style={{ borderBottom: '1px solid rgba(249,115,22,0.18)' }}>
+                  {['Feature','RoamPlan','TripAdvisor','Google Trips','Airbnb'].map((h, i) => (
+                    <th key={h} style={{ padding: '10px 12px', textAlign: i === 0 ? 'left' : 'center',
+                      color: i === 1 ? '#f97316' : 'rgba(255,255,255,0.25)', fontWeight: 700, fontSize: 11, letterSpacing: '0.05em' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -941,11 +917,11 @@ export default function Home() {
                   ['Offline access','✅ Export PDF','❌','✅','❌'],
                   ['Cost','Free / Pro','Free','Free','Free'],
                 ].map(row => (
-                  <tr key={row[0]} style={{ borderBottom:'1px solid rgba(14,165,233,0.07)' }}>
-                    {row.map((cell,i) => (
-                      <td key={i} style={{ padding:'9px 12px', textAlign:i===0?'left':'center',
-                        color: i===1 ? '#0ea5e9' : i===0 ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.25)',
-                        background: i===1 ? 'rgba(14,165,233,0.04)' : 'transparent', fontSize:11 }}>{cell}</td>
+                  <tr key={row[0]} style={{ borderBottom: '1px solid rgba(249,115,22,0.06)' }}>
+                    {row.map((cell, i) => (
+                      <td key={i} style={{ padding: '9px 12px', textAlign: i === 0 ? 'left' : 'center',
+                        color: i === 1 ? '#f97316' : i === 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.22)',
+                        background: i === 1 ? 'rgba(249,115,22,0.04)' : 'transparent', fontSize: 11 }}>{cell}</td>
                     ))}
                   </tr>
                 ))}
@@ -956,19 +932,19 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop:'1px solid rgba(14,165,233,0.12)', padding:'24px', background:'rgba(2,8,23,0.9)' }}>
-        <div style={{ maxWidth:900, margin:'0 auto', display:'flex', flexWrap:'wrap', justifyContent:'space-between', alignItems:'center', gap:16 }}>
+      <footer style={{ borderTop: '1px solid rgba(249,115,22,0.1)', padding: '24px 20px', background: 'rgba(6,8,15,0.98)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
           <div>
-            <span style={{ fontWeight:900, fontSize:15, color:'#0ea5e9' }}>RoamPlan</span>
-            <p style={{ fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:4 }}>AI travel planner — build your perfect trip in minutes.</p>
+            <span style={{ fontWeight: 900, fontSize: 15, color: '#f97316' }}>RoamPlan</span>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 4 }}>AI travel planner — build your perfect trip in minutes.</p>
           </div>
-          <div style={{ display:'flex', gap:20, flexWrap:'wrap' }}>
-            {[['About','/about'],['Privacy','/privacy'],['Terms','/terms'],['Cookie Policy','/cookies']].map(([label,href]) => (
-              <a key={label} href={href} style={{ fontSize:11, color:'rgba(255,255,255,0.25)', textDecoration:'none' }}
-                onMouseOver={e=>(e.currentTarget.style.color='#0ea5e9')} onMouseOut={e=>(e.currentTarget.style.color='rgba(255,255,255,0.25)')}>{label}</a>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {[['About','/about'],['Privacy','/privacy'],['Terms','/terms'],['Cookie Policy','/cookies']].map(([label, href]) => (
+              <a key={label} href={href} style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', textDecoration: 'none' }}
+                onMouseOver={e => (e.currentTarget.style.color = '#f97316')} onMouseOut={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}>{label}</a>
             ))}
           </div>
-          <p style={{ fontSize:10, color:'rgba(255,255,255,0.15)' }}>© 2026 RoamPlan</p>
+          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.12)' }}>© 2026 RoamPlan</p>
         </div>
       </footer>
     </main>
