@@ -9,6 +9,8 @@ import ChatBot from '@/components/ChatBot'
 import type { BrandConfig } from '@/components/SharedNavbar'
 import CookieConsent from "../../components/CookieConsent";
 import StickyFooterCTA from "../../components/StickyFooterCTA";
+import AuthButton from '@/components/AuthButton'
+import AffiliateStrip from '@/components/AffiliateStrip'
 
 export const brand: BrandConfig = {
   name: 'RoamPlan',
@@ -141,7 +143,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AnimatedBackground />
         <DesignEffects />
         <SharedNavbar brand={brand} />
+        <div style={{ position:"fixed", top:"10px", right:"16px", zIndex:60 }}><AuthButton /></div>
         <main className="flex-1 pt-16">{children}</main>
+        <AffiliateStrip />
         <Footer siteName="RoamPlan" />
         <ChatBot />
       <CookieConsent />
