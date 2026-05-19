@@ -1,6 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useGate } from '@/lib/shared/useGate'
+import RegisterGate from '@/lib/shared/RegisterGate'
 
 // Fire-and-forget stats ping
 function pingStats(path: string) {
@@ -121,18 +123,33 @@ function FloatingChat() {
 // --- Main page ---
 export default function Home() {
   const [destination, setDestination] = useState('')
+  const { count: gateCount, showGate, increment: gateIncrement, onRegistered, dismissGate } = useGate('roamplan', 2, 'plan')
 
   // ping stats on mount
   if (typeof window !== 'undefined') pingStats('/')
 
-  function handlePlan(e: React.FormEvent) {
+  async function handlePlan(e: React.FormEvent) {
     e.preventDefault()
     if (!destination.trim()) return
+    const allowed = await gateIncrement()
+    if (!allowed) return
     window.location.href = `/api/plan?destination=${encodeURIComponent(destination)}`
   }
 
   return (
     <div className="min-h-screen bg-[#030d0f] text-white relative">
+      {showGate && (
+        <RegisterGate
+          freeUsed={gateCount}
+          freeLimit={2}
+          freeFeature="free trip plans"
+          lockedFeature="unlimited itineraries + PDF export"
+          accentColor="#0ea5e9"
+          site="roamplan"
+          onSuccess={onRegistered}
+          onDismiss={dismissGate}
+        />
+      )}
       <AnimatedBg />
 
       {/* Nav */}
