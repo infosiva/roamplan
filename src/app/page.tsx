@@ -199,12 +199,18 @@ export default function Home() {
                 Plan My Trip →
               </button>
             </form>
-            <div className="flex flex-wrap gap-3 text-xs text-white/40">
-              <span>✈️ 50k+ trips planned</span>
-              <span>·</span>
-              <span>🌍 190+ countries</span>
-              <span>·</span>
-              <span>⭐ 4.9/5 rating</span>
+            <div className="flex flex-wrap gap-4 text-xs text-white/50 mb-3">
+              <span className="flex items-center gap-1">✈️ <strong className="text-white">50k+</strong> trips planned</span>
+              <span className="text-white/20">·</span>
+              <span className="flex items-center gap-1">🌍 <strong className="text-white">190+</strong> countries</span>
+              <span className="text-white/20">·</span>
+              <span className="flex items-center gap-1">⭐ <strong className="text-white">4.9/5</strong> rating</span>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-[10px] text-white/25 uppercase tracking-wider">As seen in</span>
+              {['CNN Travel', 'The Guardian', 'Thrillist', 'WIRED'].map(p => (
+                <span key={p} className="text-[11px] font-semibold text-white/35 border border-white/10 rounded px-2 py-0.5">{p}</span>
+              ))}
             </div>
           </div>
 
