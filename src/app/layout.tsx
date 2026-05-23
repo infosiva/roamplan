@@ -7,6 +7,7 @@ import DesignEffects from '@/components/DesignEffects'
 import AnimatedBackground from '@/components/AnimatedBackground'
 import type { BrandConfig } from '@/components/SharedNavbar'
 import CookieConsent from "../../components/CookieConsent";
+import BackToTop from '@/components/BackToTop'
 import StickyFooterCTA from "../../components/StickyFooterCTA";
 import AuthButton from '../../components/AuthButton'
 import AffiliateStrip from '../../components/AffiliateStrip'
@@ -147,6 +148,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1 pt-16">{children}</main>
         <AffiliateStrip />
         <Footer siteName="RoamPlan" />
+      <BackToTop accentColor="#0ea5e9" />
       <CookieConsent />
       <StickyFooterCTA />
         {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
