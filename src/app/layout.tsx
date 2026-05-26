@@ -151,9 +151,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <BackToTop accentColor="#0ea5e9" />
       <CookieConsent />
       <StickyFooterCTA />
-        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
-        <script src="http://31.97.56.148:3098/t.js" data-site="roamplan.app" defer></script>
-            <Script async src="http://31.97.56.148:3100/script.js" data-website-id="b6e28310-c2f4-4fed-a4e3-46dd4a3f4625" strategy="afterInteractive" />
+        <Script defer data-domain="roamplan.app" src="https://plausible.io/js/script.js" strategy="afterInteractive" />
       </body>
     </html>
   )
