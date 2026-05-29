@@ -7,24 +7,24 @@
 export const siteConfig = {
   name: 'RoamPlan',
   siteName: 'RoamPlan',
-  tagline: 'AI Travel Planner — Your Trip, Designed by AI',
-  subTagline: 'Plan your perfect trip with AI. Itineraries, flights, hotels, and local tips — all in one place.',
-  description: 'Plan your perfect trip with AI. Itineraries, flights, hotels, and local tips — all in one place.',
+  tagline: 'Full itinerary in 60 seconds, not hours',
+  subTagline: 'Wanderlog still needs manual input. RoamPlan generates day-by-day plans, hotel picks, and budget breakdowns from a single prompt.',
+  description: 'Wanderlog still needs manual input. RoamPlan generates day-by-day plans, hotel picks, and budget breakdowns from a single prompt.',
   url: 'https://roamplan.app',
   primaryColor: '#0ea5e9',
   icon: '✈️',
   accentColor: '#0ea5e9',
 
   meta: {
-    title: 'RoamPlan — AI Travel Planner & Itinerary Generator',
-    description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.',
-    ogTitle: 'RoamPlan — AI Travel Planner & Itinerary Generator',
-    ogDescription: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.',
+    title: 'RoamPlan — Full AI Itinerary in 60 Seconds',
+    description: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for 180+ destinations — generated instantly from one prompt.',
+    ogTitle: 'RoamPlan — Full AI Itinerary in 60 Seconds',
+    ogDescription: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for 180+ destinations — generated instantly from one prompt.',
   },
 
   seo: {
-    title: 'RoamPlan — AI Travel Planner & Itinerary Generator',
-    description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.',
+    title: 'RoamPlan — Full AI Itinerary in 60 Seconds',
+    description: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for 180+ destinations — generated instantly from one prompt.',
   },
 
   nav: {
@@ -35,12 +35,12 @@ export const siteConfig = {
       { label: 'Pricing', href: '/#pricing' },
       { label: 'About', href: '/about' },
     ],
-    cta: { label: 'Plan My Trip Free', href: '/#planner' },
+    cta: { label: 'Plan my trip now', href: '/#planner' },
   },
 
   chatbot: {
     botName: 'RoamBot',
-    openingMessage: 'Hi! 🌍 Where do you want to travel? Tell me your destination and I\'ll plan your trip.',
+    openingMessage: 'Where are you headed? Drop a destination and I\'ll build your full itinerary — days, hotels, budget.',
     apiEndpoint: '/api/chat',
     systemPrompt: `You are RoamBot, the AI travel assistant for RoamPlan — an AI-powered travel planner.
 Help users plan trips, suggest destinations, explain itinerary items, give travel tips, visa info, and budgeting advice.
