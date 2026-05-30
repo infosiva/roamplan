@@ -1,9 +1,10 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGate } from '@/lib/shared/useGate'
 import RegisterGate from '@/lib/shared/RegisterGate'
 import type { ContentOverrides } from '@/lib/content'
+import { saveTripToStorage } from './TripDashboard'
 
 function pingStats(path: string) {
   try {
@@ -163,6 +164,172 @@ function ItineraryPreview() {
   )
 }
 
+interface ItineraryDay {
+  day: number
+  theme: string
+  morning?: { activity: string; location?: string; duration?: string; cost?: string }
+  afternoon?: { activity: string; location?: string; duration?: string; cost?: string }
+  evening?: { activity: string; location?: string; duration?: string; cost?: string }
+  tips?: string
+}
+
+interface ItineraryData {
+  destination: string
+  duration: number
+  overview?: string
+  budget_estimate?: string
+  days: ItineraryDay[]
+  practical_tips?: string[]
+}
+
+const SLOT_ICONS: Record<string, string> = { morning: '🌅', afternoon: '🌞', evening: '🌙' }
+
+function ItineraryAccordion({ data, destination }: { data: ItineraryData; destination: string }) {
+  const [openDay, setOpenDay] = useState(0)
+
+  const totalActivities = (data.days || []).reduce((n, d) => {
+    return n + ['morning', 'afternoon', 'evening'].filter(s => d[s as keyof ItineraryDay]).length
+  }, 0)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="mt-6 rounded-2xl border border-sky-500/20 overflow-hidden"
+      style={{ background: 'rgba(2,12,20,0.85)', backdropFilter: 'blur(20px)' }}
+    >
+      {/* Quick stats bar */}
+      <div
+        className="flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.06] flex-wrap"
+        style={{ background: 'rgba(14,165,233,0.06)' }}
+      >
+        <span className="text-xs text-white/60 font-medium">📅 {data.duration} days</span>
+        <span className="text-white/20 text-xs">·</span>
+        <span className="text-xs text-white/60 font-medium">🏛 {totalActivities} activities</span>
+        <span className="text-white/20 text-xs">·</span>
+        {data.budget_estimate && (
+          <>
+            <span className="text-xs text-white/60 font-medium">💰 Est. {data.budget_estimate}</span>
+            <span className="text-white/20 text-xs">·</span>
+          </>
+        )}
+        <span className="text-xs text-teal-400 font-semibold">✈️ {destination}</span>
+      </div>
+
+      {/* Overview */}
+      {data.overview && (
+        <div className="px-4 py-3 border-b border-white/[0.05]">
+          <p className="text-xs text-white/50 leading-relaxed">{data.overview}</p>
+        </div>
+      )}
+
+      {/* Accordion days */}
+      <div className="divide-y divide-white/[0.05]">
+        {(data.days || []).map((day, idx) => {
+          const isOpen = openDay === idx
+          const slots = (['morning', 'afternoon', 'evening'] as const).filter(s => day[s])
+          const slotCount = slots.length
+
+          return (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: idx * 0.06, ease: [0.23, 1, 0.32, 1] }}
+            >
+              {/* Day header */}
+              <button
+                onClick={() => setOpenDay(isOpen ? -1 : idx)}
+                className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0"
+                    style={{ background: 'rgba(14,165,233,0.15)', color: '#38bdf8', border: '1px solid rgba(14,165,233,0.2)' }}
+                  >
+                    {day.day}
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
+                      Day {day.day} — {day.theme}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(20,184,166,0.1)', color: '#2dd4bf', border: '1px solid rgba(20,184,166,0.2)' }}
+                  >
+                    {slotCount} slots
+                  </span>
+                  <motion.span
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-white/30 text-xs"
+                  >
+                    ▼
+                  </motion.span>
+                </div>
+              </button>
+
+              {/* Expanded content */}
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 pb-4 pt-1 space-y-2">
+                      {slots.map((slot, si) => {
+                        const s = day[slot]
+                        if (!s) return null
+                        return (
+                          <div
+                            key={slot}
+                            className="flex items-start gap-3 py-2 px-3 rounded-xl"
+                            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+                          >
+                            <span className="text-base shrink-0 mt-0.5">{SLOT_ICONS[slot]}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                <span className="text-[10px] font-semibold text-white/30 uppercase tracking-widest">{slot}</span>
+                                {s.duration && (
+                                  <span className="text-[10px] text-sky-400/60">{s.duration}</span>
+                                )}
+                                {s.cost && (
+                                  <span className="text-[10px] text-teal-400/70 ml-auto shrink-0">{s.cost}</span>
+                                )}
+                              </div>
+                              <div className="text-xs text-white/80 font-medium leading-snug">{s.activity}</div>
+                              {s.location && (
+                                <div className="text-[11px] text-white/35 mt-0.5">📍 {s.location}</div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                      {day.tips && (
+                        <div className="flex items-start gap-2 pt-1">
+                          <span className="text-[11px] text-amber-400/60 shrink-0">💡</span>
+                          <p className="text-[11px] text-white/35 italic">{day.tips}</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )
+        })}
+      </div>
+    </motion.div>
+  )
+}
+
 const STEPS = [
   { num: '01', label: 'Pick destination' },
   { num: '02', label: 'AI plans itinerary' },
@@ -178,6 +345,11 @@ export default function HeroClient({ overrides }: Props) {
   const [mounted, setMounted] = useState(false)
   const [destination, setDestination] = useState('')
   const [travelStyle, setTravelStyle] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [itinerary, setItinerary] = useState<ItineraryData | null>(null)
+  const [error, setError] = useState('')
+  const resultRef = useRef<HTMLDivElement>(null)
+
   const { count: gateCount, showGate, increment: gateIncrement, onRegistered, dismissGate } = useGate('roamplan', 3, 'plan')
 
   const headline = overrides.headline ?? 'Your next adventure,'
@@ -201,9 +373,35 @@ export default function HeroClient({ overrides }: Props) {
     if (!destination.trim()) return
     const allowed = await gateIncrement()
     if (!allowed) return
-    const params = new URLSearchParams({ destination })
-    if (travelStyle) params.set('style', travelStyle)
-    window.location.href = `/api/plan?${params}`
+
+    setLoading(true)
+    setError('')
+    setItinerary(null)
+
+    try {
+      const res = await fetch('/api/itinerary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destination,
+          duration: 3,
+          budget: 'moderate',
+          travel_style: travelStyle || 'balanced',
+          interests: [],
+          travel_with: travelStyle === 'family' ? 'Family with Kids' : 'Solo',
+        }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      const plan = data.itinerary as ItineraryData
+      setItinerary(plan)
+      saveTripToStorage(destination, plan.duration ?? 3)
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to generate itinerary. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -252,9 +450,9 @@ export default function HeroClient({ overrides }: Props) {
 
             {/* Left: headline + search */}
             <motion.div
-              initial={mounted ? { opacity: 0, y: 24 } : false}
+              initial={mounted ? { opacity: 0, y: 20 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             >
               <motion.div
                 initial={mounted ? { opacity: 0, y: 10 } : false}
@@ -292,13 +490,23 @@ export default function HeroClient({ overrides }: Props) {
                       className="w-full bg-white/[0.06] border border-sky-500/20 rounded-xl pl-10 pr-4 py-4 text-sm text-white placeholder:text-white/30 outline-none focus:border-sky-500/50 focus:bg-white/[0.08] transition-all"
                     />
                   </div>
-                  <button
+                  <motion.button
                     type="submit"
-                    className="btn-press px-6 py-4 rounded-xl text-sm font-bold text-white whitespace-nowrap"
+                    whileTap={{ scale: 0.97 }}
+                    disabled={loading}
+                    className="px-6 py-4 rounded-xl text-sm font-bold text-white whitespace-nowrap disabled:opacity-60 transition-opacity"
                     style={{ background: 'linear-gradient(135deg,#0ea5e9,#0284c7)', boxShadow: '0 4px 20px rgba(14,165,233,0.35)' }}
                   >
-                    {cta}
-                  </button>
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Planning...
+                      </span>
+                    ) : cta}
+                  </motion.button>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -361,6 +569,27 @@ export default function HeroClient({ overrides }: Props) {
                 </motion.div>
               </div>
             </motion.div>
+          </div>
+
+          {/* ── ITINERARY RESULT ── */}
+          <div ref={resultRef}>
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-4 px-4 py-3 rounded-xl border border-red-500/20 text-sm text-red-400"
+                  style={{ background: 'rgba(239,68,68,0.06)' }}
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {itinerary && (
+              <ItineraryAccordion data={itinerary} destination={destination} />
+            )}
           </div>
         </div>
       </section>
