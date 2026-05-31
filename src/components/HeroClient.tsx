@@ -442,7 +442,7 @@ export default function HeroClient({ overrides }: Props) {
       </div>
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[80vh] flex items-center overflow-hidden">
+      <section className="relative overflow-hidden">
         <HeroBg />
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-5 py-10">
@@ -468,7 +468,7 @@ export default function HeroClient({ overrides }: Props) {
               </motion.div>
 
               <h1
-                className="text-5xl md:text-6xl font-black leading-[1.05] mb-3"
+                className="text-3xl md:text-4xl lg:text-5xl font-black leading-[1.05] mb-3"
                 style={{ fontFamily: 'Syne, sans-serif', letterSpacing: '-0.04em' }}
               >
                 {headline}<br />
@@ -477,7 +477,7 @@ export default function HeroClient({ overrides }: Props) {
                 </span>
               </h1>
 
-              <p className="text-white/55 text-lg mb-5 max-w-lg leading-relaxed">{subheadline}</p>
+              <p className="text-white/55 text-sm mb-5 max-w-lg leading-relaxed">{subheadline}</p>
 
               <form onSubmit={handlePlan} className="mb-5">
                 <div className="flex flex-col sm:flex-row gap-3 mb-4">
