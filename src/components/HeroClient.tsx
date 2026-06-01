@@ -350,7 +350,7 @@ export default function HeroClient({ overrides }: Props) {
   const [error, setError] = useState('')
   const resultRef = useRef<HTMLDivElement>(null)
 
-  const { count: gateCount, showGate, increment: gateIncrement, onRegistered, dismissGate } = useGate('roamplan', 3, 'plan')
+  const { count: gateCount, showGate, increment: gateIncrement, onRegistered, dismissGate } = useGate('roamplan', 10, 'plan')
 
   const headline = overrides.headline ?? 'Your next adventure,'
   const subheadline = overrides.subheadline ?? 'Tell the AI where you want to go. Get a complete day-by-day itinerary — morning coffee spots, hidden gems, evening rooftops — tailored to your style.'
@@ -409,7 +409,7 @@ export default function HeroClient({ overrides }: Props) {
       {showGate && (
         <RegisterGate
           freeUsed={gateCount}
-          freeLimit={3}
+          freeLimit={10}
           freeFeature="free trip plans"
           lockedFeature="unlimited itineraries + PDF export"
           accentColor="#0ea5e9"

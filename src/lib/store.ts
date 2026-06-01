@@ -7,7 +7,7 @@ export const SITE_CONFIG = {
   name: "RoamPlan",
   site: "roamplan",
   accentColor: "#0ea5e9",
-  freeLimit: 2,
+  freeLimit: 10,
   freeFeature: "free trip plans",
   lockedFeature: "unlimited itineraries + PDF export",
 };
