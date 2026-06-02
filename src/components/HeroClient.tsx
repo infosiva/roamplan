@@ -56,33 +56,51 @@ const TOKYO_ITINERARY = [
 ]
 
 function HeroBg() {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let rafId: number
+    let tx = 0, ty = 0, cx = 0, cy = 0
+    const onMove = (e: MouseEvent) => {
+      tx = ((e.clientX - window.innerWidth / 2) / window.innerWidth) * 18
+      ty = ((e.clientY - window.innerHeight / 2) / window.innerHeight) * 12
+    }
+    const tick = () => {
+      cx += (tx - cx) * 0.06
+      cy += (ty - cy) * 0.06
+      el.style.transform = `translate(${cx}px, ${cy}px) scale(1.06)`
+      rafId = requestAnimationFrame(tick)
+    }
+    window.addEventListener('mousemove', onMove, { passive: true })
+    rafId = requestAnimationFrame(tick)
+    return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(rafId) }
+  }, [])
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Parallax blob layer */}
+      <div ref={ref} className="absolute inset-0 will-change-transform" style={{ transformOrigin: 'center' }}>
+        <div
+          className="absolute top-[-20%] left-[5%] w-[600px] h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(14,165,233,0.22), transparent 70%)', filter: 'blur(90px)' }}
+        />
+        <div
+          className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.18), transparent 70%)', filter: 'blur(80px)' }}
+        />
+        <div
+          className="absolute top-[40%] left-[55%] w-[300px] h-[300px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(56,189,248,0.10), transparent 70%)', filter: 'blur(60px)' }}
+        />
+      </div>
+      {/* Subtle grain overlay — cinematic texture */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-[0.025]"
         style={{
-          background:
-            'radial-gradient(ellipse 120% 60% at 50% 0%, rgba(14,165,233,0.18) 0%, transparent 60%), radial-gradient(ellipse 80% 50% at 80% 100%, rgba(20,184,166,0.12) 0%, transparent 50%)',
-        }}
-      />
-      <motion.div
-        className="absolute top-[-15%] left-[10%] w-[500px] h-[500px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(14,165,233,0.15), transparent)', filter: 'blur(100px)' }}
-        animate={{ x: [0, 30, 0], y: [0, -20, 0], scale: [1, 1.06, 1] }}
-        transition={{ duration: 12, ease: 'easeInOut', repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute bottom-[-10%] right-[0%] w-[400px] h-[400px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.12), transparent)', filter: 'blur(80px)' }}
-        animate={{ x: [0, -20, 0], y: [0, 15, 0], scale: [1, 1.08, 1] }}
-        transition={{ duration: 15, ease: 'easeInOut', repeat: Infinity, delay: 3 }}
-      />
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(14,165,233,1) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,1) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'1\'/%3E%3C/svg%3E")',
+          backgroundSize: '200px 200px',
         }}
       />
     </div>
@@ -458,26 +476,43 @@ export default function HeroClient({ overrides }: Props) {
                 initial={mounted ? { opacity: 0, y: 10 } : false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="inline-flex items-center gap-2 mb-3 pill-glass"
+                className="inline-flex items-center gap-2 mb-4"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.10)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                  borderRadius: '9999px',
+                  padding: '6px 14px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(186,230,253,0.85)',
+                }}
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-400" />
                 </span>
                 {tagline}
               </motion.div>
 
               <h1
-                className="text-3xl md:text-4xl lg:text-5xl font-black leading-[1.05] mb-3"
+                className="text-4xl md:text-5xl lg:text-[3.5rem] font-black leading-[1.0] mb-4"
                 style={{ fontFamily: 'Syne, sans-serif', letterSpacing: '-0.04em' }}
               >
                 {headline}<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-400 to-teal-400">
+                <span
+                  className="text-transparent bg-clip-text"
+                  style={{ backgroundImage: 'linear-gradient(135deg, #38bdf8 0%, #22d3ee 50%, #2dd4bf 100%)' }}
+                >
                   planned in seconds.
                 </span>
               </h1>
 
-              <p className="text-white/55 text-sm mb-5 max-w-lg leading-relaxed">{subheadline}</p>
+              <p className="text-white/50 text-[15px] mb-5 max-w-lg leading-relaxed">{subheadline}</p>
 
               <form onSubmit={handlePlan} className="mb-5">
                 <div className="flex flex-col sm:flex-row gap-3 mb-4">
@@ -529,12 +564,12 @@ export default function HeroClient({ overrides }: Props) {
                 </div>
               </form>
 
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-white/35">
-                <span>✈️ No sign-up needed</span>
-                <span className="text-white/15">·</span>
-                <span>🌍 180+ destinations</span>
-                <span className="text-white/15">·</span>
-                <span>⚡ Itinerary in &lt;30 seconds</span>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-medium tracking-wide text-white/35 uppercase">
+                <span className="flex items-center gap-1.5">✈️ No sign-up needed</span>
+                <span className="text-white/10">·</span>
+                <span className="flex items-center gap-1.5">🌍 180+ destinations</span>
+                <span className="text-white/10">·</span>
+                <span className="flex items-center gap-1.5">⚡ &lt;30 seconds</span>
               </div>
             </motion.div>
 
