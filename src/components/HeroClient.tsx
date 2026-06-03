@@ -202,6 +202,39 @@ interface ItineraryData {
 
 const SLOT_ICONS: Record<string, string> = { morning: '🌅', afternoon: '🌞', evening: '🌙' }
 
+function downloadItinerary(data: ItineraryData, destination: string) {
+  const lines: string[] = []
+  lines.push(`ITINERARY: ${destination.toUpperCase()}`)
+  lines.push(`${data.duration} days${data.budget_estimate ? ' · Est. ' + data.budget_estimate : ''}`)
+  if (data.overview) { lines.push(''); lines.push(data.overview) }
+  lines.push('')
+  for (const day of data.days || []) {
+    lines.push(`--- Day ${day.day}: ${day.theme} ---`)
+    for (const slot of ['morning', 'afternoon', 'evening'] as const) {
+      const s = day[slot]
+      if (!s) continue
+      const parts = [slot.toUpperCase(), s.activity]
+      if (s.location) parts.push(`(${s.location})`)
+      if (s.duration) parts.push(s.duration)
+      if (s.cost) parts.push(s.cost)
+      lines.push(parts.join(' · '))
+    }
+    if (day.tips) lines.push(`Tip: ${day.tips}`)
+    lines.push('')
+  }
+  if (data.practical_tips?.length) {
+    lines.push('--- Practical Tips ---')
+    for (const tip of data.practical_tips) lines.push(`• ${tip}`)
+  }
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${destination.replace(/\s+/g, '-').toLowerCase()}-itinerary.txt`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function ItineraryAccordion({ data, destination }: { data: ItineraryData; destination: string }) {
   const [openDay, setOpenDay] = useState(0)
 
@@ -241,6 +274,19 @@ function ItineraryAccordion({ data, destination }: { data: ItineraryData; destin
           <p className="text-xs text-white/50 leading-relaxed">{data.overview}</p>
         </div>
       )}
+
+      {/* Download button */}
+      <div className="px-4 py-2.5 border-b border-white/[0.05] flex justify-end">
+        <button
+          onClick={() => downloadItinerary(data, destination)}
+          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+          style={{ background: 'rgba(14,165,233,0.1)', color: '#38bdf8', border: '1px solid rgba(14,165,233,0.2)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(14,165,233,0.18)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(14,165,233,0.1)' }}
+        >
+          ↓ Download as text
+        </button>
+      </div>
 
       {/* Accordion days */}
       <div className="divide-y divide-white/[0.05]">
