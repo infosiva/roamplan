@@ -1,5 +1,6 @@
 import { reportToTaskFlow } from '@/lib/reportToTaskFlow'
 import { NextRequest, NextResponse } from 'next/server'
+import { AI_LIMITER } from '@/lib/rateLimit'
 
 export const runtime = 'nodejs'
 
@@ -13,6 +14,7 @@ Help users plan trips, suggest destinations, explain itinerary items, give trave
 Be enthusiastic, concise, and practical. Help them get the most from their trip.`
 
 export async function POST(req: NextRequest) {
+  const limited = AI_LIMITER.check(req); if (limited) return limited
   try {
     const body = await req.json()
     const messages: Message[] = body.messages
