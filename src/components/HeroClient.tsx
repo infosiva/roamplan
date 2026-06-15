@@ -117,17 +117,17 @@ function ItineraryPreview() {
   }, [])
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-sky-500/20 bg-[#020c14]/80 backdrop-blur-xl shadow-2xl shadow-black/50">
-      <div className="px-4 pt-4 pb-3 border-b border-white/[0.06]">
+    <div className="rounded-2xl overflow-hidden border border-emerald-500/20 bg-white/90 backdrop-blur-xl shadow-2xl shadow-emerald-900/10">
+      <div className="px-4 pt-4 pb-3 border-b border-emerald-100">
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-lg">🗼</span>
-              <span className="font-bold text-white text-base" style={{ fontFamily: 'Syne, sans-serif' }}>3 Days in Tokyo</span>
+              <span className="font-bold text-slate-900 text-base" style={{ fontFamily: 'Syne, sans-serif' }}>3 Days in Tokyo</span>
             </div>
-            <div className="text-[11px] text-sky-400/70">AI-generated · Nov 12–14 · Solo</div>
+            <div className="text-[11px] text-emerald-600/80">AI-generated · Nov 12–14 · Solo</div>
           </div>
-          <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400">AI Plan</span>
+          <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">AI Plan</span>
         </div>
         <div className="flex gap-1.5">
           {TOKYO_ITINERARY.map((d, i) => (
@@ -136,9 +136,9 @@ function ItineraryPreview() {
               onClick={() => setActiveDay(i)}
               className="text-[11px] font-medium px-3 py-1 rounded-full transition-all"
               style={{
-                background: activeDay === i ? 'rgba(14,165,233,0.2)' : 'rgba(255,255,255,0.04)',
-                color: activeDay === i ? '#38bdf8' : 'rgba(255,255,255,0.35)',
-                border: activeDay === i ? '1px solid rgba(14,165,233,0.3)' : '1px solid transparent',
+                background: activeDay === i ? 'rgba(5,150,105,0.12)' : 'rgba(15,23,42,0.04)',
+                color: activeDay === i ? '#059669' : 'rgba(15,23,42,0.40)',
+                border: activeDay === i ? '1px solid rgba(5,150,105,0.30)' : '1px solid transparent',
               }}
             >
               {d.day}
@@ -156,17 +156,17 @@ function ItineraryPreview() {
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="p-4"
         >
-          <div className="text-[11px] font-semibold text-sky-400/60 uppercase tracking-widest mb-3">{day.theme}</div>
+          <div className="text-[11px] font-semibold text-emerald-600/70 uppercase tracking-widest mb-3">{day.theme}</div>
           <div className="space-y-3">
             {day.slots.map((slot, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="flex flex-col items-center gap-1 pt-0.5">
                   <span className="text-base">{slot.icon}</span>
-                  {i < day.slots.length - 1 && <div className="w-px h-5 bg-white/10" />}
+                  {i < day.slots.length - 1 && <div className="w-px h-5 bg-emerald-200" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-0.5">{slot.time}</div>
-                  <div className="text-xs text-white/75 leading-relaxed">{slot.activity}</div>
+                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">{slot.time}</div>
+                  <div className="text-xs text-slate-700 leading-relaxed">{slot.activity}</div>
                 </div>
               </div>
             ))}
@@ -174,9 +174,9 @@ function ItineraryPreview() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="px-4 py-3 border-t border-white/[0.05] flex items-center justify-between">
-        <div className="text-[11px] text-white/30">3 days · 9 activities · ¥45k budget</div>
-        <div className="text-[11px] text-sky-400 font-semibold cursor-pointer hover:text-sky-300 transition-colors">Customize →</div>
+      <div className="px-4 py-3 border-t border-emerald-100 flex items-center justify-between">
+        <div className="text-[11px] text-slate-400">3 days · 9 activities · ¥45k budget</div>
+        <div className="text-[11px] text-emerald-600 font-semibold cursor-pointer hover:text-emerald-700 transition-colors">Customize →</div>
       </div>
     </div>
   )
@@ -247,25 +247,25 @@ function ItineraryAccordion({ data, destination }: { data: ItineraryData; destin
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="mt-6 rounded-2xl border border-sky-500/20 overflow-hidden"
-      style={{ background: 'rgba(2,12,20,0.85)', backdropFilter: 'blur(20px)' }}
+      className="mt-6 rounded-2xl border border-emerald-200 overflow-hidden"
+      style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)' }}
     >
       {/* Quick stats bar */}
       <div
-        className="flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.06] flex-wrap"
-        style={{ background: 'rgba(14,165,233,0.06)' }}
+        className="flex items-center gap-3 px-4 py-2.5 border-b border-emerald-100 flex-wrap"
+        style={{ background: 'rgba(5,150,105,0.05)' }}
       >
-        <span className="text-xs text-white/60 font-medium">📅 {data.duration} days</span>
-        <span className="text-white/20 text-xs">·</span>
-        <span className="text-xs text-white/60 font-medium">🏛 {totalActivities} activities</span>
-        <span className="text-white/20 text-xs">·</span>
+        <span className="text-xs text-slate-600 font-medium">📅 {data.duration} days</span>
+        <span className="text-slate-300 text-xs">·</span>
+        <span className="text-xs text-slate-600 font-medium">🏛 {totalActivities} activities</span>
+        <span className="text-slate-300 text-xs">·</span>
         {data.budget_estimate && (
           <>
-            <span className="text-xs text-white/60 font-medium">💰 Est. {data.budget_estimate}</span>
-            <span className="text-white/20 text-xs">·</span>
+            <span className="text-xs text-slate-600 font-medium">💰 Est. {data.budget_estimate}</span>
+            <span className="text-slate-300 text-xs">·</span>
           </>
         )}
-        <span className="text-xs text-teal-400 font-semibold">✈️ {destination}</span>
+        <span className="text-xs text-emerald-600 font-semibold">✈️ {destination}</span>
       </div>
 
       {/* Overview */}

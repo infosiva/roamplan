@@ -5,7 +5,7 @@ import TripDashboard from '@/components/TripDashboard'
 
 export default function Home() {
   return (
-    <div className="min-h-screen text-white relative" style={{ background: 'var(--theme-base, #020c14)' }}>
+    <div className="min-h-screen relative" style={{ background: 'var(--theme-base, #f0fdf4)', color: 'var(--foreground, #0f172a)' }}>
       <HeroSection />
       <TripDashboard />
       <SectionsClient />

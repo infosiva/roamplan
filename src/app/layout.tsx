@@ -47,9 +47,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ])
 
   const themeCSS = buildThemeStyleTag(theme, {
-    background: '#020c14',
-    primary: '#0ea5e9',
-    secondary: '#38bdf8',
+    background: '#f0fdf4',
+    primary: '#059669',
+    secondary: '#34d399',
   })
 
   return (
@@ -92,20 +92,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
-            --theme-primary: #0ea5e9;
-            --theme-secondary: #38bdf8;
-            --theme-base: #020c14;
-            --background: #020c14;
-            --surface-1: #061622;
-            --surface-2: #0a1e2e;
-            --foreground: #f0f9ff;
-            --text-2: #7dd3fc;
-            --border-default: rgba(14,165,233,0.15);
-            --border-strong: rgba(14,165,233,0.3);
+            --theme-primary: #059669;
+            --theme-secondary: #34d399;
+            --theme-base: #f0fdf4;
+            --background: #f0fdf4;
+            --surface-1: #ffffff;
+            --surface-2: #ecfdf5;
+            --foreground: #0f172a;
+            --text-2: #475569;
+            --border-default: rgba(5,150,105,0.15);
+            --border-strong: rgba(5,150,105,0.30);
           }
           body { font-family: 'Inter', system-ui, sans-serif !important; }
           h1, h2, h3 { font-family: 'Syne', sans-serif !important; letter-spacing: -0.03em; }
-          .glass { background: rgba(2,12,20,0.7) !important; border-color: rgba(14,165,233,0.12) !important; }
+          .glass { background: rgba(255,255,255,0.80) !important; border-color: rgba(5,150,105,0.12) !important; }
           ${themeCSS}
         ` }} />
       </head>
@@ -119,12 +119,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <AffiliateStrip />
         <Footer siteName="RoamPlan" />
         {flags.chatbot && !isWidgetHidden(theme, 'chatbot') && <ChatBot />}
-        {!isWidgetHidden(theme, 'backToTop') && <BackToTop accentColor="#0ea5e9" />}
+        {!isWidgetHidden(theme, 'backToTop') && <BackToTop accentColor="#059669" />}
         {!isWidgetHidden(theme, 'cookieConsent') && <CookieConsent />}
         {!isWidgetHidden(theme, 'stickyFooterCTA') && <StickyFooterCTA />}
         <Script defer data-domain="roamplan.app" src="https://plausible.io/js/script.js" strategy="afterInteractive" />
         <Script defer data-site="roamplan.app" src="http://31.97.56.148:3098/t.js" strategy="afterInteractive" />
-        <FeedbackWidget siteName="RoamPlan" accentColor="#0ea5e9" position="left" />
+        <FeedbackWidget siteName="RoamPlan" accentColor="#059669" position="left" />
       </body>
     </html>
   )
