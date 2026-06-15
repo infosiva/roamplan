@@ -9,6 +9,7 @@ import DesignEffects from '@/components/DesignEffects'
 import AnimatedBackground from '@/components/AnimatedBackground'
 import CookieConsent from "../../components/CookieConsent"
 import BackToTop from '@/components/BackToTop'
+import FloatingChatWrapper from '@/components/FloatingChatWrapper'
 import StickyFooterCTA from "../../components/StickyFooterCTA"
 import AuthButton from '../../components/AuthButton'
 import AffiliateStrip from '../../components/AffiliateStrip'
@@ -125,6 +126,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Script defer data-domain="roamplan.app" src="https://plausible.io/js/script.js" strategy="afterInteractive" />
         <Script defer data-site="roamplan.app" src="http://31.97.56.148:3098/t.js" strategy="afterInteractive" />
         <FeedbackWidget siteName="RoamPlan" accentColor="#059669" position="left" />
+        <FloatingChatWrapper />
       </body>
     </html>
   )
