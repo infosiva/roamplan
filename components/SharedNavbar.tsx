@@ -28,9 +28,20 @@ export default function SharedNavbar({ brand }: { brand: BrandConfig }) {
         ${scrolled ? 'bg-[#07060f]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-lg' : 'bg-transparent'}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-          <span className="text-2xl">{brand.icon}</span>
-          <span className="font-bold text-white text-[15px] tracking-tight">{brand.name}</span>
+        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+          <span style={{
+            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle cx="12" cy="10" r="3" stroke="white" strokeWidth="2" fill="none"/>
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="white" strokeWidth="2" fill="none"/>
+            </svg>
+          </span>
+          <span className="font-black text-[17px] tracking-tight" style={{ color: '#fff', letterSpacing: '-0.03em' }}>
+            Roam<span style={{ color: '#059669' }}>Plan</span>
+          </span>
         </Link>
 
         {/* Desktop nav */}
