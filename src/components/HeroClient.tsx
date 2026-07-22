@@ -6,17 +6,6 @@ import RegisterGate from '@/lib/shared/RegisterGate'
 import type { ContentOverrides } from '@/lib/content'
 import { saveTripToStorage } from './TripDashboard'
 
-function pingStats(path: string) {
-  try {
-    fetch('http://31.97.56.148:3099/api/stats', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ site: 'roamplan.app', path, userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '', timestamp: new Date().toISOString() }),
-      keepalive: true,
-    }).catch(() => {})
-  } catch { /* ignore */ }
-}
-
 const TRAVEL_STYLES = [
   { id: 'solo', label: 'Solo', icon: '🧳' },
   { id: 'couple', label: 'Couple', icon: '💑' },
@@ -423,7 +412,6 @@ export default function HeroClient({ overrides }: Props) {
 
   useEffect(() => {
     setMounted(true)
-    if (typeof window !== 'undefined') pingStats('/')
     function onSetDest(e: Event) {
       const dest = (e as CustomEvent<string>).detail
       setDestination(dest)
