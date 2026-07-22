@@ -92,7 +92,7 @@ export default function GammaPromptCard({
           {/* Card header */}
           <div className="flex items-center justify-between px-6 pt-5 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-gray-900">{label}</span>
+              <h1 className="text-lg font-bold text-gray-900">{label}</h1>
               {labelBadge && (
                 <span
                   className="text-[10px] font-bold px-2 py-0.5 rounded-full"
