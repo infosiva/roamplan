@@ -17,6 +17,7 @@ import { brand } from '@/lib/brand'
 import { getSiteFlags } from '@/lib/flags'
 import { loadSiteTheme, buildThemeStyleTag, isWidgetHidden } from '@/lib/theme-loader'
 
+import { MotionProvider } from "@infosiva/shared-ui/modern";
 export const metadata: Metadata = {
   title: 'RoamPlan — AI Travel Planner & Itinerary Generator',
   description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.',
@@ -116,7 +117,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <DesignEffects />
         <SharedNavbar brand={brand} />
         <div style={{ position:"fixed", top:"10px", right:"16px", zIndex:60 }}><AuthButton /></div>
-        <main className="flex-1 pt-16">{children}</main>
+        <main className="flex-1 pt-16"><MotionProvider>{children}</MotionProvider></main>
         <AffiliateStrip />
         <Footer siteName="RoamPlan" />
         {flags.chatbot && !isWidgetHidden(theme, 'chatbot') && <ChatBot />}
