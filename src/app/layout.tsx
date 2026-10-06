@@ -10,22 +10,21 @@ import AnimatedBackground from '@/components/AnimatedBackground'
 import CookieConsent from "../../components/CookieConsent"
 import BackToTop from '@/components/BackToTop'
 import FloatingChatWrapper from '@/components/FloatingChatWrapper'
-import StickyFooterCTA from "../../components/StickyFooterCTA"
 import AuthButton from '../../components/AuthButton'
 import AffiliateStrip from '../../components/AffiliateStrip'
 import { brand } from '@/lib/brand'
 import { getSiteFlags } from '@/lib/flags'
-import { loadSiteTheme, buildThemeStyleTag, isWidgetHidden } from '@/lib/theme-loader'
+import { loadSiteTheme, buildThemeStyleTag, buildGa4Snippet, isWidgetHidden } from '@/lib/theme-loader'
 
 import { MotionProvider } from "@infosiva/shared-ui/modern";
 export const metadata: Metadata = {
   title: 'RoamPlan — AI Travel Planner & Itinerary Generator',
-  description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.',
+  description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for any destination.',
   keywords: ['travel planner', 'AI itinerary', 'trip planner', 'travel itinerary', 'holiday planner', 'AI travel', 'itinerary builder', 'personalised travel', 'AI trip planner'],
   metadataBase: new URL('https://roamplan.app'),
   openGraph: {
     title: 'RoamPlan — AI Travel Planner & Itinerary Generator',
-    description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.',
+    description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for any destination.',
     type: 'website',
     locale: 'en_US',
     siteName: 'RoamPlan',
@@ -35,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'RoamPlan — AI Travel Planner & Itinerary Generator',
-    description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.',
+    description: 'Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for any destination.',
     images: ['https://roamplan.app/og.png'],
   },
   robots: { index: true, follow: true },
@@ -49,10 +48,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ])
 
   const themeCSS = buildThemeStyleTag(theme, {
-    background: '#f0fdf4',
-    primary: '#059669',
-    secondary: '#34d399',
+    background: '#ecfeff',
+    primary: '#0e7490',
+    secondary: '#22d3ee',
   })
+
+  const ga4 = buildGa4Snippet(theme)
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -64,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             "@type": "TravelAgency",
             "name": "RoamPlan",
             "url": "https://roamplan.app",
-            "description": "Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for 180+ destinations.",
+            "description": "Plan your perfect trip with AI. Custom itineraries, hotel picks, and local tips for any destination.",
             "logo": "https://roamplan.app/icon.png",
             "sameAs": ["https://twitter.com/roamplanapp", "https://instagram.com/roamplanapp"],
             "areaServed": "Worldwide",
@@ -84,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             "mainEntity": [
               { "@type": "Question", "name": "How does RoamPlan AI travel planner work?", "acceptedAnswer": { "@type": "Answer", "text": "Tell RoamPlan your destination, travel dates, interests and budget. Our AI generates a complete day-by-day itinerary with hotels, restaurants, activities and local tips in under 60 seconds." } },
               { "@type": "Question", "name": "Is RoamPlan free to use?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — RoamPlan is free to use with no sign-up required. Generate up to 3 itineraries per day for free. Pro plans unlock unlimited trips and PDF export." } },
-              { "@type": "Question", "name": "How many destinations does RoamPlan support?", "acceptedAnswer": { "@type": "Answer", "text": "RoamPlan supports 180+ destinations worldwide — from major cities like Paris, Tokyo, and New York to off-the-beaten-path gems." } },
+              { "@type": "Question", "name": "How many destinations does RoamPlan support?", "acceptedAnswer": { "@type": "Answer", "text": "RoamPlan can plan trips to destinations worldwide — from major cities like Paris, Tokyo, and New York to off-the-beaten-path gems." } },
               { "@type": "Question", "name": "Can RoamPlan plan family trips with kids?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — RoamPlan has a dedicated family mode that adds kid-friendly activities, playgrounds, family dining, and age-appropriate pacing to your itinerary." } },
             ],
           },
@@ -94,38 +95,39 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
-            --theme-primary: #059669;
-            --theme-secondary: #34d399;
-            --theme-base: #f0fdf4;
-            --background: #f0fdf4;
+            --theme-primary: #0e7490;
+            --theme-secondary: #22d3ee;
+            --theme-base: #ecfeff;
+            --background: #ecfeff;
             --surface-1: #ffffff;
-            --surface-2: #ecfdf5;
+            --surface-2: #cffafe;
             --foreground: #0f172a;
             --text-2: #475569;
-            --border-default: rgba(5,150,105,0.15);
-            --border-strong: rgba(5,150,105,0.30);
+            --border-default: rgba(14,116,144,0.15);
+            --border-strong: rgba(14,116,144,0.30);
           }
           body { font-family: 'Inter', system-ui, sans-serif !important; }
           h1, h2, h3 { font-family: 'Syne', sans-serif !important; letter-spacing: -0.03em; }
-          .glass { background: rgba(255,255,255,0.80) !important; border-color: rgba(5,150,105,0.12) !important; }
+          .glass { background: rgba(255,255,255,0.80) !important; border-color: rgba(14,116,144,0.12) !important; }
           ${themeCSS}
         ` }} />
+        {ga4 && <script async src={`https://www.googletagmanager.com/gtag/js?id=${theme?.analytics?.ga4Id}`} />}
+        {ga4 && <script dangerouslySetInnerHTML={{ __html: ga4 }} />}
       </head>
       <body className="flex flex-col min-h-screen">
         <AnimatedBackground />
         <div className="grain" aria-hidden />
         <DesignEffects />
         <SharedNavbar brand={brand} />
-        <div style={{ position:"fixed", top:"10px", right:"16px", zIndex:60 }}><AuthButton /></div>
+        <div className="fixed top-2.5 right-16 md:right-4 z-[60]"><AuthButton /></div>
         <main className="flex-1 pt-16"><MotionProvider>{children}</MotionProvider></main>
         <AffiliateStrip />
         <Footer siteName="RoamPlan" />
         {flags.chatbot && !isWidgetHidden(theme, 'chatbot') && <ChatBot />}
-        {!isWidgetHidden(theme, 'backToTop') && <BackToTop accentColor="#059669" />}
+        {!isWidgetHidden(theme, 'backToTop') && <BackToTop accentColor="#0e7490" />}
         {!isWidgetHidden(theme, 'cookieConsent') && <CookieConsent />}
-        {!isWidgetHidden(theme, 'stickyFooterCTA') && <StickyFooterCTA />}
         <Script defer data-domain="roamplan.app" src="https://plausible.io/js/script.js" strategy="afterInteractive" />
-        <FeedbackWidget siteName="RoamPlan" accentColor="#059669" position="left" />
+        <FeedbackWidget siteName="RoamPlan" accentColor="#0e7490" position="left" />
         <FloatingChatWrapper />
       </body>
     </html>
