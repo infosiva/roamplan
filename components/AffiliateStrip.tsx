@@ -6,7 +6,7 @@ export default function AffiliateStrip() {
   return (
     <section
       style={{
-        padding: "32px 24px",
+        padding: "12px 24px",
         borderTop: "1px solid rgba(99,102,241,0.15)",
         background: "rgba(99,102,241,0.03)",
       }}
@@ -19,7 +19,7 @@ export default function AffiliateStrip() {
           textTransform: "uppercase",
           letterSpacing: "0.1em",
           color: "rgba(148,163,184,0.6)",
-          marginBottom: "20px",
+          marginBottom: "8px",
         }}
       >
         Tools that pair well with {SITE_CONFIG.name}
@@ -28,8 +28,9 @@ export default function AffiliateStrip() {
         style={{
           display: "flex",
           gap: "12px",
-          justifyContent: "center",
-          flexWrap: "wrap",
+          justifyContent: "safe center",
+          flexWrap: "nowrap",
+          overflowX: "auto",
           maxWidth: "800px",
           margin: "0 auto",
         }}
@@ -44,7 +45,8 @@ export default function AffiliateStrip() {
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              padding: "10px 16px",
+              padding: "8px 14px",
+              flexShrink: 0,
               borderRadius: "10px",
               border: "1px solid rgba(51,65,85,0.4)",
               background: "rgba(15,23,42,0.6)",

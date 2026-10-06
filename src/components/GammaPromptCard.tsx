@@ -66,7 +66,7 @@ export default function GammaPromptCard({
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative min-h-[560px] flex flex-col items-center justify-center overflow-hidden">
       {/* Background */}
       <div
         className="absolute inset-0 z-0"

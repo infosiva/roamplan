@@ -39,8 +39,8 @@ export default function Footer({
   const allLinks = [...complianceLinks, ...extraLinks];
 
   return (
-    <footer className={`w-full border-t border-white/[0.06] bg-transparent mt-auto ${className}`}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+    <footer className={`w-full border-t border-white/[0.06] bg-[#061622] mt-auto ${className}`}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5">
         {/* Brand + links row */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
@@ -51,11 +51,11 @@ export default function Footer({
               </div>
             )}
             {tagline && (
-              <p className="text-white/40 text-xs max-w-xs">{tagline}</p>
+              <p className="text-white/60 text-xs max-w-xs">{tagline}</p>
             )}
           </div>
 
-          <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-4 text-xs text-white/40">
+          <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-4 text-xs text-white/60">
             {allLinks.map((link) => (
               <Link key={link.href} href={link.href} className="hover:text-white/70 transition-colors">
                 {link.label}
@@ -65,7 +65,7 @@ export default function Footer({
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-8 pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/30">
+        <div className="mt-3 pt-3 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
           <span>© {year} {siteName}. All rights reserved.</span>
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
