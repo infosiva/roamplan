@@ -119,7 +119,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <div className="grain" aria-hidden />
         <DesignEffects />
         <SharedNavbar brand={brand} />
-        <div className="fixed top-2.5 right-16 md:right-4 z-[60]"><AuthButton /></div>
+        <div className="fixed top-2.5 right-[72px] md:right-4 z-[60]"><AuthButton /></div>
         <main className="flex-1 pt-16"><MotionProvider>{children}</MotionProvider></main>
         <AffiliateStrip />
         <Footer siteName="RoamPlan" />
