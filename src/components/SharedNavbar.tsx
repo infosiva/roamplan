@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Logo } from './Logo'
 
 export interface NavLink { label: string; href: string; external?: boolean }
 export interface BrandConfig {
@@ -40,16 +41,7 @@ export default function SharedNavbar({ brand }: { brand: BrandConfig }) {
         <div className="max-w-5xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group select-none">
-            <span
-              className="flex items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110"
-              style={{ width: 26, height: 26, background: `linear-gradient(135deg, ${brand.color}, #22d3ee)`, flexShrink: 0 }}
-              aria-hidden
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="2" fill="none" />
-                <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" fill="white" />
-              </svg>
-            </span>
+            <Logo color={brand.color} />
             <span className="font-semibold text-slate-900 text-sm tracking-tight">
               {brand.name.replace(/Plan$/,'')}<span style={{ color: brand.color }}>{brand.name.endsWith('Plan') ? 'Plan' : ''}</span>
             </span>
@@ -115,16 +107,7 @@ export default function SharedNavbar({ brand }: { brand: BrandConfig }) {
         >
           <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b border-white/[0.05]">
             <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
-              <span
-                className="flex items-center justify-center rounded-lg"
-                style={{ width: 24, height: 24, background: `linear-gradient(135deg, ${brand.color}, #22d3ee)`, flexShrink: 0 }}
-                aria-hidden
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="2" fill="none" />
-                  <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" fill="white" />
-                </svg>
-              </span>
+              <Logo color={brand.color} size={24} />
               <span className="font-semibold text-white/90 text-sm">{brand.name}</span>
             </Link>
             <button onClick={() => setOpen(false)} className="p-1.5 text-white/40 hover:text-white/80 transition-colors">
