@@ -17,4 +17,4 @@
 ## ANIMATED SCOPE (gate items 19/21, derived from code 2026-10-07)
 - Moves: AnimatedBackground (ambient hero/background); CSS keyframes: ambientPulse, badgeFloat, blink, borderSpin, cloudDrift, fadeIn, fadeUp, float; transitions on interactive elements.
 - Trigger: page load (ambient) and hover/press (interactive). Reduced motion: honoured via prefers-reduced-motion block.
-- STATUS: scope documented from existing code only. Skill-stack passes (ui-ux-pro-max, emil-design-eng, impeccable critique, review-animations) and 375/1280 screenshot review are NOT yet run for this app. Item 21 stays OPEN until they are.
+- SKILL-STACK: done. Changed: hero (GammaPromptCard) now has gradient + animated aurora background (CSS blobs, transform only), animated example-itinerary demo panel, staggered entry + press-scale motion, 44px targets, autofocus only on fine pointers; verified 375 + 1280 screenshots, no horizontal scroll, reduced-motion disables blobs/demo cycling.

@@ -887,6 +887,22 @@ pre {
 }
 
 /* gate item 21: respect reduced motion */
+/* RoamPlan hero: aurora background, entry + press motion (transform/opacity only) */
+.rp-blob { position: absolute; border-radius: 9999px; filter: blur(70px); opacity: .55; will-change: transform; }
+.rp-blob-a { width: 520px; height: 520px; left: -8%; top: -20%; background: #06b6d4; animation: rpDriftA 18s ease-in-out infinite alternate; }
+.rp-blob-b { width: 460px; height: 460px; right: -6%; top: 10%; background: #6366f1; animation: rpDriftB 22s ease-in-out infinite alternate; }
+.rp-blob-c { width: 420px; height: 420px; left: 30%; bottom: -25%; background: #10b981; animation: rpDriftC 26s ease-in-out infinite alternate; }
+@keyframes rpDriftA { to { transform: translate(18vw, 12%) scale(1.15) } }
+@keyframes rpDriftB { to { transform: translate(-16vw, 18%) scale(.9) } }
+@keyframes rpDriftC { to { transform: translate(-12vw, -14%) scale(1.2) } }
+@keyframes rpRise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+.rp-enter { animation: rpRise .6s cubic-bezier(.23,1,.32,1) both }
+.rp-enter-2 { animation-delay: .15s }
+.rp-rise { animation: rpRise .45s cubic-bezier(.23,1,.32,1) both }
+.rp-press { transition: transform .15s cubic-bezier(.23,1,.32,1) }
+.rp-press:active { transform: scale(.97) }
+@media (max-width: 1023px) { .rp-blob { opacity: .45 } }
 @media (prefers-reduced-motion: reduce) {
+  .rp-blob { animation: none !important }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

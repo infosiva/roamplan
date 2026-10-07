@@ -81,7 +81,7 @@ If unclear, use sensible defaults. duration default 5, budget default "mid-range
       placeholder="Plan a 7-day trip to Japan in spring, solo traveller, mid-range budget, love food and temples..."
       onSubmit={handlePrompt}
       bgImage="/hero-bg.png"
-      bgGradient="linear-gradient(135deg, #052e16 0%, #0f2a1a 50%, #0a1628 100%)"
+      bgGradient="linear-gradient(135deg, #042f3a 0%, #0b1f4a 55%, #1b1457 100%)"
       accentColor="#0e7490"
       suggestions={SUGGESTIONS}
       outputSlot={
