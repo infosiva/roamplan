@@ -10,7 +10,7 @@
  *     { target: '#save-btn',   title: 'Save & Recap', body: 'AI writes your daily summary.',    placement: 'top'    },
  *   ]
  *
- *   <GuidedTour steps={STEPS} storageKey="myvitals_tour_v1" accentColor="#34d399" />
+ *   <GuidedTour steps={STEPS} storageKey="myvitals_tour_v1" accentColor="#22d3ee" />
  *
  * storageKey — change the suffix (v1→v2) to re-show after a major update.
  * accentColor — brand colour for the highlight ring + buttons.
@@ -42,7 +42,7 @@ const RING      = 8    // spotlight ring padding
 export default function GuidedTour({
   steps,
   storageKey,
-  accentColor = '#34d399',
+  accentColor = '#22d3ee',
   delay = 1200,
 }: Props) {
   const [active, setActive]   = useState(false)

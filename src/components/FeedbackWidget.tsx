@@ -155,7 +155,7 @@ export default function FeedbackWidget({
               display: 'flex', flexDirection: 'column', alignItems: 'center',
               justifyContent: 'center', padding: '48px 20px', gap: 16,
             }}>
-              <CheckCircle style={{ width: 56, height: 56, color: '#34d399' }} />
+              <CheckCircle style={{ width: 56, height: 56, color: '#22d3ee' }} />
               <p style={{ color: '#fff', fontWeight: 900, fontSize: 18, margin: 0 }}>Thank you!</p>
               <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: 0, textAlign: 'center' }}>
                 Your feedback has been received. We read every message.

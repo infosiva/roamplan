@@ -17,14 +17,14 @@ export const siteConfig = {
 
   meta: {
     title: 'RoamPlan — Full AI Itinerary in 60 Seconds',
-    description: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for 180+ destinations — generated instantly from one prompt.',
+    description: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for Any destination — generated instantly from one prompt.',
     ogTitle: 'RoamPlan — Full AI Itinerary in 60 Seconds',
-    ogDescription: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for 180+ destinations — generated instantly from one prompt.',
+    ogDescription: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for Any destination — generated instantly from one prompt.',
   },
 
   seo: {
     title: 'RoamPlan — Full AI Itinerary in 60 Seconds',
-    description: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for 180+ destinations — generated instantly from one prompt.',
+    description: 'Get a day-by-day itinerary, hotel picks, and budget breakdown for Any destination — generated instantly from one prompt.',
   },
 
   nav: {
@@ -91,42 +91,12 @@ Be enthusiastic, concise, and practical. Help them get the most from their trip.
     { city: 'Safari',    emoji: '🦁', tag: 'Adventure', gradient: 'from-[#451a03] via-[#92400e] to-[#1a2e1a]' },
   ],
 
-  testimonials: [
-    {
-      name: 'Sarah K.',
-      location: 'London, UK',
-      text: 'Planned my entire 10-day Japan trip in under 5 minutes. The day-by-day breakdown was incredibly detailed — better than anything a travel agent quoted me for £200.',
-      rating: 5,
-      destination: 'Japan',
-    },
-    {
-      name: 'Marco D.',
-      location: 'Milan, Italy',
-      text: 'Used it for a family trip to Bali with two kids. The family mode added playground stops, kids menus, and nap times into the schedule. Brilliant.',
-      rating: 5,
-      destination: 'Bali',
-    },
-    {
-      name: 'Aiko T.',
-      location: 'Singapore',
-      text: 'The budget breakdown was spot-on. We were on a tight budget and it found us amazing local spots instead of tourist traps.',
-      rating: 5,
-      destination: 'Thailand',
-    },
-  ],
+  testimonials: [] as { name: string; location: string; text: string; rating: number; destination: string }[], // removed: unverified quotes
 
-  stats: [
-    { stat: '31,000+', label: 'Trips planned' },
-    { stat: '180+',    label: 'Destinations worldwide' },
-    { stat: '14,200+', label: 'Happy travellers' },
-  ],
+  stats: [] as { stat: string; label: string }[], // removed: unverifiable counts
 
   // Stats object form for layout/about pages
-  statsObj: {
-    trips: '31,000+',
-    destinations: '180+',
-    travellers: '14,200+',
-  },
+  statsObj: { trips: '', destinations: '', travellers: '' },
 
   social: {
     twitter: 'https://twitter.com/roamplanapp',

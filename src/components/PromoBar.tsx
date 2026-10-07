@@ -8,7 +8,7 @@
 import { useState } from 'react'
 import { usePromo } from '@/hooks/usePromo'
 
-const ACCENT = '#059669'
+const ACCENT = '#0e7490'
 
 export default function PromoBar() {
   const { isUnlocked, daysLeft } = usePromo()

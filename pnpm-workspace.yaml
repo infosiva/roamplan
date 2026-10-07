@@ -1,0 +1,2 @@
+minimumReleaseAgeExclude:
+  - '@infosiva/shared-ui@1.4.4'

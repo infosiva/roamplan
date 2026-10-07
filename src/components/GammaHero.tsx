@@ -82,7 +82,7 @@ If unclear, use sensible defaults. duration default 5, budget default "mid-range
       onSubmit={handlePrompt}
       bgImage="/hero-bg.png"
       bgGradient="linear-gradient(135deg, #052e16 0%, #0f2a1a 50%, #0a1628 100%)"
-      accentColor="#059669"
+      accentColor="#0e7490"
       suggestions={SUGGESTIONS}
       outputSlot={
         error ? (

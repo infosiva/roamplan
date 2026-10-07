@@ -3,10 +3,10 @@
 export default function AnimatedBackground() {
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden>
-      {/* Light green-tint base — matches --background: #f0fdf4 */}
+      {/* Light green-tint base — matches --background: #ecfeff */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: '#f0fdf4',
+        background: '#ecfeff',
       }} />
 
       {/* Soft emerald bloom top-right */}
@@ -38,19 +38,19 @@ export default function AnimatedBackground() {
       <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="emeraldTrail1" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#059669" stopOpacity="0" />
+            <stop offset="0%" stopColor="#0e7490" stopOpacity="0" />
             <stop offset="50%" stopColor="#10b981" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#059669" stopOpacity="0" />
+            <stop offset="100%" stopColor="#0e7490" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="emeraldTrail2" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#047857" stopOpacity="0" />
-            <stop offset="50%" stopColor="#059669" stopOpacity="0.16" />
+            <stop offset="50%" stopColor="#0e7490" stopOpacity="0.16" />
             <stop offset="100%" stopColor="#047857" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="emeraldTrail3" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#34d399" stopOpacity="0" />
+            <stop offset="0%" stopColor="#22d3ee" stopOpacity="0" />
             <stop offset="50%" stopColor="#6ee7b7" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
           </linearGradient>
         </defs>
         {/* Arc 1 — mid sweep */}

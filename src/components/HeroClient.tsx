@@ -126,7 +126,7 @@ function ItineraryPreview() {
               className="text-[11px] font-medium px-3 py-1 rounded-full transition-all"
               style={{
                 background: activeDay === i ? 'rgba(5,150,105,0.12)' : 'rgba(15,23,42,0.04)',
-                color: activeDay === i ? '#059669' : 'rgba(15,23,42,0.40)',
+                color: activeDay === i ? '#0e7490' : 'rgba(15,23,42,0.40)',
                 border: activeDay === i ? '1px solid rgba(5,150,105,0.30)' : '1px solid transparent',
               }}
             >
@@ -601,7 +601,7 @@ export default function HeroClient({ overrides }: Props) {
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-medium tracking-wide text-white/35 uppercase">
                 <span className="flex items-center gap-1.5">✈️ No sign-up needed</span>
                 <span className="text-white/10">·</span>
-                <span className="flex items-center gap-1.5">🌍 180+ destinations</span>
+                <span className="flex items-center gap-1.5">🌍 Any destination</span>
                 <span className="text-white/10">·</span>
                 <span className="flex items-center gap-1.5">⚡ &lt;30 seconds</span>
               </div>

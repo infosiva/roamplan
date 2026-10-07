@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useToast, ToastItem, ToastType } from './useToast'
 
 const COLORS: Record<ToastType, { bg: string; border: string; icon: string; text: string }> = {
-  success: { bg: '#f0fdf4', border: '#86efac', icon: '✓', text: '#166534' },
+  success: { bg: '#ecfeff', border: '#86efac', icon: '✓', text: '#166534' },
   error:   { bg: '#fef2f2', border: '#fca5a5', icon: '✕', text: '#991b1b' },
   info:    { bg: '#eff6ff', border: '#93c5fd', icon: 'ℹ', text: '#1e40af' },
   warning: { bg: '#fffbeb', border: '#fcd34d', icon: '⚠', text: '#92400e' },

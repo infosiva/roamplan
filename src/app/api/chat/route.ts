@@ -25,10 +25,11 @@ export async function POST(req: NextRequest) {
     }
 
     const groqKey = process.env.GROQ_API_KEY
-    if (!groqKey) return NextResponse.json({ error: 'AI not configured' }, { status: 503 })
+    const soft = (t: string) => new NextResponse(t, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } })
+    const SOFT_ERR = 'The assistant is busy right now. Please try again in a moment.'
 
     let res: Response | null = null
-    for (const model of ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b']) {
+    if (groqKey) for (const model of ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b']) {
       const attempt = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${groqKey}` },
@@ -54,7 +55,17 @@ if (!res || !res.body) {
           if (gr.ok) { const gt = (await gr.json()).candidates?.[0]?.content?.parts?.[0]?.text; if (gt) return new NextResponse(gt, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } }) }
         } catch { /* fall through */ }
       }
-      return NextResponse.json({ error: 'AI request failed' }, { status: 502 })
+      const ck = process.env.CEREBRAS_API_KEY
+      if (ck) {
+        try {
+          const cr = await fetch('https://api.cerebras.ai/v1/chat/completions', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ck}` },
+            body: JSON.stringify({ model: 'llama3.1-8b', messages: [{ role: 'system', content: systemPrompt }, ...messages], max_tokens: 600 }),
+          })
+          if (cr.ok) { const ct = (await cr.json()).choices?.[0]?.message?.content; if (ct) return soft(ct) }
+        } catch { /* fall through */ }
+      }
+      return soft(SOFT_ERR)
     }
 
     void reportToTaskFlow({ project: 'roamplan', agentName: 'ChatBot', status: 'completed', message: 'Chat message processed' })
@@ -90,6 +101,6 @@ if (!res || !res.body) {
     })
   } catch (err) {
     console.error('[/api/chat]', err)
-    return NextResponse.json({ error: 'Chat failed' }, { status: 500 })
+    return new NextResponse('The assistant is busy right now. Please try again in a moment.', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
   }
 }

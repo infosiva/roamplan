@@ -42,7 +42,7 @@ export default function SharedNavbar({ brand }: { brand: BrandConfig }) {
           <Link href="/" className="flex items-center gap-2 group select-none">
             <span
               className="flex items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110"
-              style={{ width: 26, height: 26, background: `linear-gradient(135deg, ${brand.color}, #34d399)`, flexShrink: 0 }}
+              style={{ width: 26, height: 26, background: `linear-gradient(135deg, ${brand.color}, #22d3ee)`, flexShrink: 0 }}
               aria-hidden
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -51,7 +51,7 @@ export default function SharedNavbar({ brand }: { brand: BrandConfig }) {
               </svg>
             </span>
             <span className="font-semibold text-slate-900 text-sm tracking-tight">
-              {brand.name}
+              {brand.name.replace(/Plan$/,'')}<span style={{ color: brand.color }}>{brand.name.endsWith('Plan') ? 'Plan' : ''}</span>
             </span>
           </Link>
 
@@ -117,7 +117,7 @@ export default function SharedNavbar({ brand }: { brand: BrandConfig }) {
             <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
               <span
                 className="flex items-center justify-center rounded-lg"
-                style={{ width: 24, height: 24, background: `linear-gradient(135deg, ${brand.color}, #34d399)`, flexShrink: 0 }}
+                style={{ width: 24, height: 24, background: `linear-gradient(135deg, ${brand.color}, #22d3ee)`, flexShrink: 0 }}
                 aria-hidden
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none">

@@ -4,7 +4,7 @@ export const brand: BrandConfig = {
   name: 'RoamPlan',
   tagline: 'AI Travel Planner — Your Trip, Designed by AI',
   icon: '✈️',
-  color: '#0ea5e9',
+  color: '#0e7490',
   url: 'https://roamplan.app',
   navLinks: [
     { label: 'Home', href: '/' },

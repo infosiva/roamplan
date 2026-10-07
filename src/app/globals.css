@@ -9,7 +9,7 @@
    via CSS vars injected in layout.tsx
 ───────────────────────────────────────── */
 :root {
-  --background: #f0fdf4;
+  --background: #ecfeff;
   --surface-1:  #ffffff;
   --surface-2:  #ecfdf5;
   --foreground: #0f172a;
@@ -30,13 +30,13 @@
   --radius-xl: 1.5rem;
 
   /* Theme vars — injected by layout.tsx */
-  --theme-primary:   #059669;
-  --theme-secondary: #34d399;
-  --theme-base:      #f0fdf4;
+  --theme-primary:   #0e7490;
+  --theme-secondary: #22d3ee;
+  --theme-base:      #ecfeff;
 
   /* Semantic aliases */
-  --accent:   #059669;
-  --accent-2: #34d399;
+  --accent:   #0e7490;
+  --accent-2: #22d3ee;
   --card:     #ffffff;
   --card-foreground: #1e293b;
   --border:   #d1fae5;
@@ -579,7 +579,7 @@ body {
     color-mix(in srgb, var(--theme-primary, #7c3aed) 80%, transparent),
     #a78bfa,
     #38bdf8,
-    #34d399,
+    #22d3ee,
     #fbbf24,
     color-mix(in srgb, var(--theme-primary, #7c3aed) 80%, transparent)
   );
@@ -601,7 +601,7 @@ body {
   transform: translateY(-3px) scale(1.01);
   box-shadow:
     0 20px 60px -10px rgb(5 150 105 / 0.15),
-    0 0 40px color-mix(in srgb, var(--theme-primary, #059669) 20%, transparent),
+    0 0 40px color-mix(in srgb, var(--theme-primary, #0e7490) 20%, transparent),
     inset 0 1px 0 rgb(255 255 255 / 0.5);
 }
 
@@ -622,7 +622,7 @@ body {
 }
 .liquid-blob-2 {
   width: 400px; height: 400px;
-  background: radial-gradient(circle, #a855f7, #34d399 60%, transparent);
+  background: radial-gradient(circle, #a855f7, #22d3ee 60%, transparent);
   animation-delay: -4s, -3s;
   opacity: 0.12;
 }
@@ -639,7 +639,7 @@ body {
     90deg,
     var(--theme-secondary, #a78bfa) 0%,
     #38bdf8 25%,
-    #34d399 50%,
+    #22d3ee 50%,
     #fbbf24 75%,
     var(--theme-secondary, #a78bfa) 100%
   );
