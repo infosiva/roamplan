@@ -14,7 +14,7 @@ import AuthButton from '../../components/AuthButton'
 import AffiliateStrip from '../../components/AffiliateStrip'
 import { brand } from '@/lib/brand'
 import { getSiteFlags } from '@/lib/flags'
-import { loadSiteTheme, buildThemeStyleTag, buildGa4Snippet, isWidgetHidden } from '@/lib/theme-loader'
+import { loadSiteTheme, buildThemeStyleTag, buildGa4Snippet, resolveGa4Id, isWidgetHidden } from '@/lib/theme-loader'
 
 import { MotionProvider } from "@infosiva/shared-ui/modern";
 export const metadata: Metadata = {
@@ -111,7 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           .glass { background: rgba(255,255,255,0.80) !important; border-color: rgba(14,116,144,0.12) !important; }
           ${themeCSS}
         ` }} />
-        {ga4 && <script async src={`https://www.googletagmanager.com/gtag/js?id=${theme?.analytics?.ga4Id}`} />}
+        {ga4 && <script async src={`https://www.googletagmanager.com/gtag/js?id=${resolveGa4Id(theme)}`} />}
         {ga4 && <script dangerouslySetInnerHTML={{ __html: ga4 }} />}
       </head>
       <body className="flex flex-col min-h-screen">
